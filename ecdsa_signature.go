@@ -4,6 +4,7 @@ package secp256k1
 import "C"
 import (
 	"encoding/hex"
+
 	"github.com/pkg/errors"
 )
 
@@ -15,7 +16,7 @@ const (
 // ECDSASignature is a type representing a ECDSA Signature.
 // The struct itself is an opaque data type that should only be created via the supplied methods.
 type ECDSASignature struct {
-	signature C.secp256k1_ecdsa_signature
+	signature C.kaspa_secp256k1_ecdsa_signature
 }
 
 // SerializedECDSASignature is a is a byte array representing the storage representation of a ECDSASignature
@@ -46,7 +47,7 @@ func (signature ECDSASignature) String() string {
 func (signature *ECDSASignature) Serialize() *SerializedECDSASignature {
 	serialized := SerializedECDSASignature{}
 	cPtr := (*C.uchar)(&serialized[0])
-	ret := C.secp256k1_ecdsa_signature_serialize_compact(C.secp256k1_context_no_precomp, cPtr, &signature.signature)
+	ret := C.kaspa_secp256k1_ecdsa_signature_serialize_compact(C.kaspa_secp256k1_context_no_precomp, cPtr, &signature.signature)
 	if ret != 1 {
 		panic("failed serializing a signature. Should never happen (upstream promise to return 1)")
 	}
@@ -57,7 +58,7 @@ func (signature *ECDSASignature) Serialize() *SerializedECDSASignature {
 func DeserializeECDSASignature(serializedSignature *SerializedECDSASignature) (*ECDSASignature, error) {
 	signature := ECDSASignature{}
 	cPtr := (*C.uchar)(&serializedSignature[0])
-	ret := C.secp256k1_ecdsa_signature_parse_compact(C.secp256k1_context_no_precomp, &signature.signature, cPtr)
+	ret := C.kaspa_secp256k1_ecdsa_signature_parse_compact(C.kaspa_secp256k1_context_no_precomp, &signature.signature, cPtr)
 	if ret != 1 {
 		return nil, errors.New("failed parsing the ECDSA signature")
 	}

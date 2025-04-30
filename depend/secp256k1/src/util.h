@@ -4,8 +4,8 @@
  * file COPYING or https://www.opensource.org/licenses/mit-license.php.*
  ***********************************************************************/
 
-#ifndef SECP256K1_UTIL_H
-#define SECP256K1_UTIL_H
+#ifndef kaspa_secp256k1_UTIL_H
+#define kaspa_secp256k1_UTIL_H
 
 #if defined HAVE_CONFIG_H
 #include "libsecp256k1-config.h"
@@ -19,9 +19,9 @@
 typedef struct {
     void (*fn)(const char *text, void* data);
     const void* data;
-} secp256k1_callback;
+} kaspa_secp256k1_callback;
 
-static SECP256K1_INLINE void secp256k1_callback_call(const secp256k1_callback * const cb, const char * const text) {
+static kaspa_secp256k1_INLINE void kaspa_secp256k1_callback_call(const kaspa_secp256k1_callback * const cb, const char * const text) {
     cb->fn(text, (void*)cb->data);
 }
 
@@ -37,7 +37,7 @@ static SECP256K1_INLINE void secp256k1_callback_call(const secp256k1_callback * 
 } while(0)
 #endif
 
-#if SECP256K1_GNUC_PREREQ(3, 0)
+#if kaspa_secp256k1_GNUC_PREREQ(3, 0)
 #define EXPECT(x,c) __builtin_expect((x),(c))
 #else
 #define EXPECT(x,c) (x)
@@ -88,18 +88,18 @@ static SECP256K1_INLINE void secp256k1_callback_call(const secp256k1_callback * 
 #define VG_CHECK_VERIFY(x,y)
 #endif
 
-static SECP256K1_INLINE void *checked_malloc(const secp256k1_callback* cb, size_t size) {
+static kaspa_secp256k1_INLINE void *checked_malloc(const kaspa_secp256k1_callback* cb, size_t size) {
     void *ret = malloc(size);
     if (ret == NULL) {
-        secp256k1_callback_call(cb, "Out of memory");
+        kaspa_secp256k1_callback_call(cb, "Out of memory");
     }
     return ret;
 }
 
-static SECP256K1_INLINE void *checked_realloc(const secp256k1_callback* cb, void *ptr, size_t size) {
+static kaspa_secp256k1_INLINE void *checked_realloc(const kaspa_secp256k1_callback* cb, void *ptr, size_t size) {
     void *ret = realloc(ptr, size);
     if (ret == NULL) {
-        secp256k1_callback_call(cb, "Out of memory");
+        kaspa_secp256k1_callback_call(cb, "Out of memory");
     }
     return ret;
 }
@@ -131,7 +131,7 @@ static SECP256K1_INLINE void *checked_realloc(const secp256k1_callback* cb, void
  * It is VERIFY_CHECKed that there is enough space left in the memory object and
  * *prealloc_ptr is aligned relative to base.
  */
-static SECP256K1_INLINE void *manual_alloc(void** prealloc_ptr, size_t alloc_size, void* base, size_t max_size) {
+static kaspa_secp256k1_INLINE void *manual_alloc(void** prealloc_ptr, size_t alloc_size, void* base, size_t max_size) {
     size_t aligned_alloc_size = ROUND_TO_ALIGN(alloc_size);
     void* ret;
     VERIFY_CHECK(prealloc_ptr != NULL);
@@ -146,19 +146,19 @@ static SECP256K1_INLINE void *manual_alloc(void** prealloc_ptr, size_t alloc_siz
 }
 
 /* Macro for restrict, when available and not in a VERIFY build. */
-#if defined(SECP256K1_BUILD) && defined(VERIFY)
-# define SECP256K1_RESTRICT
+#if defined(kaspa_secp256k1_BUILD) && defined(VERIFY)
+# define kaspa_secp256k1_RESTRICT
 #else
 # if (!defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L) )
-#  if SECP256K1_GNUC_PREREQ(3,0)
-#   define SECP256K1_RESTRICT __restrict__
+#  if kaspa_secp256k1_GNUC_PREREQ(3,0)
+#   define kaspa_secp256k1_RESTRICT __restrict__
 #  elif (defined(_MSC_VER) && _MSC_VER >= 1400)
-#   define SECP256K1_RESTRICT __restrict
+#   define kaspa_secp256k1_RESTRICT __restrict
 #  else
-#   define SECP256K1_RESTRICT
+#   define kaspa_secp256k1_RESTRICT
 #  endif
 # else
-#  define SECP256K1_RESTRICT restrict
+#  define kaspa_secp256k1_RESTRICT restrict
 # endif
 #endif
 
@@ -171,13 +171,13 @@ static SECP256K1_INLINE void *manual_alloc(void** prealloc_ptr, size_t alloc_siz
 #endif
 
 #if defined(__GNUC__)
-# define SECP256K1_GNUC_EXT __extension__
+# define kaspa_secp256k1_GNUC_EXT __extension__
 #else
-# define SECP256K1_GNUC_EXT
+# define kaspa_secp256k1_GNUC_EXT
 #endif
 
-/* If SECP256K1_{LITTLE,BIG}_ENDIAN is not explicitly provided, infer from various other system macros. */
-#if !defined(SECP256K1_LITTLE_ENDIAN) && !defined(SECP256K1_BIG_ENDIAN)
+/* If kaspa_secp256k1_{LITTLE,BIG}_ENDIAN is not explicitly provided, infer from various other system macros. */
+#if !defined(kaspa_secp256k1_LITTLE_ENDIAN) && !defined(kaspa_secp256k1_BIG_ENDIAN)
 /* Inspired by https://github.com/rofl0r/endianness.h/blob/9853923246b065a3b52d2c43835f3819a62c7199/endianness.h#L52L73 */
 # if (defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || \
      defined(_X86_) || defined(__x86_64__) || defined(__i386__) || \
@@ -187,22 +187,22 @@ static SECP256K1_INLINE void *manual_alloc(void** prealloc_ptr, size_t alloc_siz
      (defined(__LITTLE_ENDIAN__) && __LITTLE_ENDIAN__ == 1) || \
      (defined(_LITTLE_ENDIAN) && _LITTLE_ENDIAN == 1) || \
      defined(_M_IX86) || defined(_M_AMD64) || defined(_M_ARM) /* MSVC */
-#  define SECP256K1_LITTLE_ENDIAN
+#  define kaspa_secp256k1_LITTLE_ENDIAN
 # endif
 # if (defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__) || \
      defined(__MIPSEB) || defined(_MIPSEB) || defined(MIPSEB) || \
      defined(__MICROBLAZEEB__) || defined(__ARMEB__) || defined(__AARCH64EB__) || \
      (defined(__BIG_ENDIAN__) && __BIG_ENDIAN__ == 1) || \
      (defined(_BIG_ENDIAN) && _BIG_ENDIAN == 1)
-#  define SECP256K1_BIG_ENDIAN
+#  define kaspa_secp256k1_BIG_ENDIAN
 # endif
 #endif
-#if defined(SECP256K1_LITTLE_ENDIAN) == defined(SECP256K1_BIG_ENDIAN)
-# error Please make sure that either SECP256K1_LITTLE_ENDIAN or SECP256K1_BIG_ENDIAN is set, see src/util.h.
+#if defined(kaspa_secp256k1_LITTLE_ENDIAN) == defined(kaspa_secp256k1_BIG_ENDIAN)
+# error Please make sure that either kaspa_secp256k1_LITTLE_ENDIAN or kaspa_secp256k1_BIG_ENDIAN is set, see src/util.h.
 #endif
 
 /* Zero memory if flag == 1. Flag must be 0 or 1. Constant time. */
-static SECP256K1_INLINE void secp256k1_memczero(void *s, size_t len, int flag) {
+static kaspa_secp256k1_INLINE void kaspa_secp256k1_memczero(void *s, size_t len, int flag) {
     unsigned char *p = (unsigned char *)s;
     /* Access flag with a volatile-qualified lvalue.
        This prevents clang from figuring out (after inlining) that flag can
@@ -221,7 +221,7 @@ static SECP256K1_INLINE void secp256k1_memczero(void *s, size_t len, int flag) {
  * We use this to avoid possible compiler bugs with memcmp, e.g.
  * https://gcc.gnu.org/bugzilla/show_bug.cgi?id=95189
  */
-static SECP256K1_INLINE int secp256k1_memcmp_var(const void *s1, const void *s2, size_t n) {
+static kaspa_secp256k1_INLINE int kaspa_secp256k1_memcmp_var(const void *s1, const void *s2, size_t n) {
     const unsigned char *p1 = s1, *p2 = s2;
     size_t i;
 
@@ -235,7 +235,7 @@ static SECP256K1_INLINE int secp256k1_memcmp_var(const void *s1, const void *s2,
 }
 
 /** If flag is true, set *r equal to *a; otherwise leave it. Constant-time.  Both *r and *a must be initialized and non-negative.*/
-static SECP256K1_INLINE void secp256k1_int_cmov(int *r, const int *a, int flag) {
+static kaspa_secp256k1_INLINE void kaspa_secp256k1_int_cmov(int *r, const int *a, int flag) {
     unsigned int mask0, mask1, r_masked, a_masked;
     /* Access flag with a volatile-qualified lvalue.
        This prevents clang from figuring out (after inlining) that flag can
@@ -257,18 +257,18 @@ static SECP256K1_INLINE void secp256k1_int_cmov(int *r, const int *a, int flag) 
  * Otherwise use the presence of __SIZEOF_INT128__ to decide.
  */
 #if defined(USE_FORCE_WIDEMUL_INT128)
-# define SECP256K1_WIDEMUL_INT128 1
+# define kaspa_secp256k1_WIDEMUL_INT128 1
 #elif defined(USE_FORCE_WIDEMUL_INT64)
-# define SECP256K1_WIDEMUL_INT64 1
+# define kaspa_secp256k1_WIDEMUL_INT64 1
 #elif defined(UINT128_MAX) || defined(__SIZEOF_INT128__)
-# define SECP256K1_WIDEMUL_INT128 1
+# define kaspa_secp256k1_WIDEMUL_INT128 1
 #else
-# define SECP256K1_WIDEMUL_INT64 1
+# define kaspa_secp256k1_WIDEMUL_INT64 1
 #endif
-#if defined(SECP256K1_WIDEMUL_INT128)
+#if defined(kaspa_secp256k1_WIDEMUL_INT128)
 # if !defined(UINT128_MAX) && defined(__SIZEOF_INT128__)
-SECP256K1_GNUC_EXT typedef unsigned __int128 uint128_t;
-SECP256K1_GNUC_EXT typedef __int128 int128_t;
+kaspa_secp256k1_GNUC_EXT typedef unsigned __int128 uint128_t;
+kaspa_secp256k1_GNUC_EXT typedef __int128 int128_t;
 #define UINT128_MAX ((uint128_t)(-1))
 #define INT128_MAX ((int128_t)(UINT128_MAX >> 1))
 #define INT128_MIN (-INT128_MAX - 1)
@@ -282,8 +282,8 @@ SECP256K1_GNUC_EXT typedef __int128 int128_t;
 
 /* Determine the number of trailing zero bits in a (non-zero) 32-bit x.
  * This function is only intended to be used as fallback for
- * secp256k1_ctz32_var, but permits it to be tested separately. */
-static SECP256K1_INLINE int secp256k1_ctz32_var_debruijn(uint32_t x) {
+ * kaspa_secp256k1_ctz32_var, but permits it to be tested separately. */
+static kaspa_secp256k1_INLINE int kaspa_secp256k1_ctz32_var_debruijn(uint32_t x) {
     static const uint8_t debruijn[32] = {
         0x00, 0x01, 0x02, 0x18, 0x03, 0x13, 0x06, 0x19, 0x16, 0x04, 0x14, 0x0A,
         0x10, 0x07, 0x0C, 0x1A, 0x1F, 0x17, 0x12, 0x05, 0x15, 0x09, 0x0F, 0x0B,
@@ -294,8 +294,8 @@ static SECP256K1_INLINE int secp256k1_ctz32_var_debruijn(uint32_t x) {
 
 /* Determine the number of trailing zero bits in a (non-zero) 64-bit x.
  * This function is only intended to be used as fallback for
- * secp256k1_ctz64_var, but permits it to be tested separately. */
-static SECP256K1_INLINE int secp256k1_ctz64_var_debruijn(uint64_t x) {
+ * kaspa_secp256k1_ctz64_var, but permits it to be tested separately. */
+static kaspa_secp256k1_INLINE int kaspa_secp256k1_ctz64_var_debruijn(uint64_t x) {
     static const uint8_t debruijn[64] = {
         0, 1, 2, 53, 3, 7, 54, 27, 4, 38, 41, 8, 34, 55, 48, 28,
         62, 5, 39, 46, 44, 42, 22, 9, 24, 35, 59, 56, 49, 18, 29, 11,
@@ -306,39 +306,39 @@ static SECP256K1_INLINE int secp256k1_ctz64_var_debruijn(uint64_t x) {
 }
 
 /* Determine the number of trailing zero bits in a (non-zero) 32-bit x. */
-static SECP256K1_INLINE int secp256k1_ctz32_var(uint32_t x) {
+static kaspa_secp256k1_INLINE int kaspa_secp256k1_ctz32_var(uint32_t x) {
     VERIFY_CHECK(x != 0);
-#if (__has_builtin(__builtin_ctz) || SECP256K1_GNUC_PREREQ(3,4))
+#if (__has_builtin(__builtin_ctz) || kaspa_secp256k1_GNUC_PREREQ(3,4))
     /* If the unsigned type is sufficient to represent the largest uint32_t, consider __builtin_ctz. */
     if (((unsigned)UINT32_MAX) == UINT32_MAX) {
         return __builtin_ctz(x);
     }
 #endif
-#if (__has_builtin(__builtin_ctzl) || SECP256K1_GNUC_PREREQ(3,4))
+#if (__has_builtin(__builtin_ctzl) || kaspa_secp256k1_GNUC_PREREQ(3,4))
     /* Otherwise consider __builtin_ctzl (the unsigned long type is always at least 32 bits). */
     return __builtin_ctzl(x);
 #else
     /* If no suitable CTZ builtin is available, use a (variable time) software emulation. */
-    return secp256k1_ctz32_var_debruijn(x);
+    return kaspa_secp256k1_ctz32_var_debruijn(x);
 #endif
 }
 
 /* Determine the number of trailing zero bits in a (non-zero) 64-bit x. */
-static SECP256K1_INLINE int secp256k1_ctz64_var(uint64_t x) {
+static kaspa_secp256k1_INLINE int kaspa_secp256k1_ctz64_var(uint64_t x) {
     VERIFY_CHECK(x != 0);
-#if (__has_builtin(__builtin_ctzl) || SECP256K1_GNUC_PREREQ(3,4))
+#if (__has_builtin(__builtin_ctzl) || kaspa_secp256k1_GNUC_PREREQ(3,4))
     /* If the unsigned long type is sufficient to represent the largest uint64_t, consider __builtin_ctzl. */
     if (((unsigned long)UINT64_MAX) == UINT64_MAX) {
         return __builtin_ctzl(x);
     }
 #endif
-#if (__has_builtin(__builtin_ctzll) || SECP256K1_GNUC_PREREQ(3,4))
+#if (__has_builtin(__builtin_ctzll) || kaspa_secp256k1_GNUC_PREREQ(3,4))
     /* Otherwise consider __builtin_ctzll (the unsigned long long type is always at least 64 bits). */
     return __builtin_ctzll(x);
 #else
     /* If no suitable CTZ builtin is available, use a (variable time) software emulation. */
-    return secp256k1_ctz64_var_debruijn(x);
+    return kaspa_secp256k1_ctz64_var_debruijn(x);
 #endif
 }
 
-#endif /* SECP256K1_UTIL_H */
+#endif /* kaspa_secp256k1_UTIL_H */

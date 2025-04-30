@@ -4,8 +4,8 @@
  * file COPYING or https://www.opensource.org/licenses/mit-license.php.*
  ***********************************************************************/
 
-#ifndef SECP256K1_TESTRAND_IMPL_H
-#define SECP256K1_TESTRAND_IMPL_H
+#ifndef kaspa_secp256k1_TESTRAND_IMPL_H
+#define kaspa_secp256k1_TESTRAND_IMPL_H
 
 #include <stdint.h>
 #include <stdio.h>
@@ -14,38 +14,38 @@
 #include "testrand.h"
 #include "hash.h"
 
-static secp256k1_rfc6979_hmac_sha256 secp256k1_test_rng;
-static uint32_t secp256k1_test_rng_precomputed[8];
-static int secp256k1_test_rng_precomputed_used = 8;
-static uint64_t secp256k1_test_rng_integer;
-static int secp256k1_test_rng_integer_bits_left = 0;
+static kaspa_secp256k1_rfc6979_hmac_sha256 kaspa_secp256k1_test_rng;
+static uint32_t kaspa_secp256k1_test_rng_precomputed[8];
+static int kaspa_secp256k1_test_rng_precomputed_used = 8;
+static uint64_t kaspa_secp256k1_test_rng_integer;
+static int kaspa_secp256k1_test_rng_integer_bits_left = 0;
 
-SECP256K1_INLINE static void secp256k1_testrand_seed(const unsigned char *seed16) {
-    secp256k1_rfc6979_hmac_sha256_initialize(&secp256k1_test_rng, seed16, 16);
+kaspa_secp256k1_INLINE static void kaspa_secp256k1_testrand_seed(const unsigned char *seed16) {
+    kaspa_secp256k1_rfc6979_hmac_sha256_initialize(&kaspa_secp256k1_test_rng, seed16, 16);
 }
 
-SECP256K1_INLINE static uint32_t secp256k1_testrand32(void) {
-    if (secp256k1_test_rng_precomputed_used == 8) {
-        secp256k1_rfc6979_hmac_sha256_generate(&secp256k1_test_rng, (unsigned char*)(&secp256k1_test_rng_precomputed[0]), sizeof(secp256k1_test_rng_precomputed));
-        secp256k1_test_rng_precomputed_used = 0;
+kaspa_secp256k1_INLINE static uint32_t kaspa_secp256k1_testrand32(void) {
+    if (kaspa_secp256k1_test_rng_precomputed_used == 8) {
+        kaspa_secp256k1_rfc6979_hmac_sha256_generate(&kaspa_secp256k1_test_rng, (unsigned char*)(&kaspa_secp256k1_test_rng_precomputed[0]), sizeof(kaspa_secp256k1_test_rng_precomputed));
+        kaspa_secp256k1_test_rng_precomputed_used = 0;
     }
-    return secp256k1_test_rng_precomputed[secp256k1_test_rng_precomputed_used++];
+    return kaspa_secp256k1_test_rng_precomputed[kaspa_secp256k1_test_rng_precomputed_used++];
 }
 
-static uint32_t secp256k1_testrand_bits(int bits) {
+static uint32_t kaspa_secp256k1_testrand_bits(int bits) {
     uint32_t ret;
-    if (secp256k1_test_rng_integer_bits_left < bits) {
-        secp256k1_test_rng_integer |= (((uint64_t)secp256k1_testrand32()) << secp256k1_test_rng_integer_bits_left);
-        secp256k1_test_rng_integer_bits_left += 32;
+    if (kaspa_secp256k1_test_rng_integer_bits_left < bits) {
+        kaspa_secp256k1_test_rng_integer |= (((uint64_t)kaspa_secp256k1_testrand32()) << kaspa_secp256k1_test_rng_integer_bits_left);
+        kaspa_secp256k1_test_rng_integer_bits_left += 32;
     }
-    ret = secp256k1_test_rng_integer;
-    secp256k1_test_rng_integer >>= bits;
-    secp256k1_test_rng_integer_bits_left -= bits;
+    ret = kaspa_secp256k1_test_rng_integer;
+    kaspa_secp256k1_test_rng_integer >>= bits;
+    kaspa_secp256k1_test_rng_integer_bits_left -= bits;
     ret &= ((~((uint32_t)0)) >> (32 - bits));
     return ret;
 }
 
-static uint32_t secp256k1_testrand_int(uint32_t range) {
+static uint32_t kaspa_secp256k1_testrand_int(uint32_t range) {
     /* We want a uniform integer between 0 and range-1, inclusive.
      * B is the smallest number such that range <= 2**B.
      * two mechanisms implemented here:
@@ -77,25 +77,25 @@ static uint32_t secp256k1_testrand_int(uint32_t range) {
         mult = 1;
     }
     while(1) {
-        uint32_t x = secp256k1_testrand_bits(bits);
+        uint32_t x = kaspa_secp256k1_testrand_bits(bits);
         if (x < trange) {
             return (mult == 1) ? x : (x % range);
         }
     }
 }
 
-static void secp256k1_testrand256(unsigned char *b32) {
-    secp256k1_rfc6979_hmac_sha256_generate(&secp256k1_test_rng, b32, 32);
+static void kaspa_secp256k1_testrand256(unsigned char *b32) {
+    kaspa_secp256k1_rfc6979_hmac_sha256_generate(&kaspa_secp256k1_test_rng, b32, 32);
 }
 
-static void secp256k1_testrand_bytes_test(unsigned char *bytes, size_t len) {
+static void kaspa_secp256k1_testrand_bytes_test(unsigned char *bytes, size_t len) {
     size_t bits = 0;
     memset(bytes, 0, len);
     while (bits < len * 8) {
         int now;
         uint32_t val;
-        now = 1 + (secp256k1_testrand_bits(6) * secp256k1_testrand_bits(5) + 16) / 31;
-        val = secp256k1_testrand_bits(1);
+        now = 1 + (kaspa_secp256k1_testrand_bits(6) * kaspa_secp256k1_testrand_bits(5) + 16) / 31;
+        val = kaspa_secp256k1_testrand_bits(1);
         while (now > 0 && bits < len * 8) {
             bytes[bits / 8] |= val << (bits % 8);
             now--;
@@ -104,15 +104,15 @@ static void secp256k1_testrand_bytes_test(unsigned char *bytes, size_t len) {
     }
 }
 
-static void secp256k1_testrand256_test(unsigned char *b32) {
-    secp256k1_testrand_bytes_test(b32, 32);
+static void kaspa_secp256k1_testrand256_test(unsigned char *b32) {
+    kaspa_secp256k1_testrand_bytes_test(b32, 32);
 }
 
-static void secp256k1_testrand_flip(unsigned char *b, size_t len) {
-    b[secp256k1_testrand_int(len)] ^= (1 << secp256k1_testrand_int(8));
+static void kaspa_secp256k1_testrand_flip(unsigned char *b, size_t len) {
+    b[kaspa_secp256k1_testrand_int(len)] ^= (1 << kaspa_secp256k1_testrand_int(8));
 }
 
-static void secp256k1_testrand_init(const char* hexseed) {
+static void kaspa_secp256k1_testrand_init(const char* hexseed) {
     unsigned char seed16[16] = {0};
     if (hexseed && strlen(hexseed) != 0) {
         int pos = 0;
@@ -146,13 +146,13 @@ static void secp256k1_testrand_init(const char* hexseed) {
     }
 
     printf("random seed = %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\n", seed16[0], seed16[1], seed16[2], seed16[3], seed16[4], seed16[5], seed16[6], seed16[7], seed16[8], seed16[9], seed16[10], seed16[11], seed16[12], seed16[13], seed16[14], seed16[15]);
-    secp256k1_testrand_seed(seed16);
+    kaspa_secp256k1_testrand_seed(seed16);
 }
 
-static void secp256k1_testrand_finish(void) {
+static void kaspa_secp256k1_testrand_finish(void) {
     unsigned char run32[32];
-    secp256k1_testrand256(run32);
+    kaspa_secp256k1_testrand256(run32);
     printf("random run = %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\n", run32[0], run32[1], run32[2], run32[3], run32[4], run32[5], run32[6], run32[7], run32[8], run32[9], run32[10], run32[11], run32[12], run32[13], run32[14], run32[15]);
 }
 
-#endif /* SECP256K1_TESTRAND_IMPL_H */
+#endif /* kaspa_secp256k1_TESTRAND_IMPL_H */

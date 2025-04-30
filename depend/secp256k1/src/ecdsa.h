@@ -4,8 +4,8 @@
  * file COPYING or https://www.opensource.org/licenses/mit-license.php.*
  ***********************************************************************/
 
-#ifndef SECP256K1_ECDSA_H
-#define SECP256K1_ECDSA_H
+#ifndef kaspa_secp256k1_ECDSA_H
+#define kaspa_secp256k1_ECDSA_H
 
 #include <stddef.h>
 
@@ -13,9 +13,9 @@
 #include "group.h"
 #include "ecmult.h"
 
-static int secp256k1_ecdsa_sig_parse(secp256k1_scalar *r, secp256k1_scalar *s, const unsigned char *sig, size_t size);
-static int secp256k1_ecdsa_sig_serialize(unsigned char *sig, size_t *size, const secp256k1_scalar *r, const secp256k1_scalar *s);
-static int secp256k1_ecdsa_sig_verify(const secp256k1_ecmult_context *ctx, const secp256k1_scalar* r, const secp256k1_scalar* s, const secp256k1_ge *pubkey, const secp256k1_scalar *message);
-static int secp256k1_ecdsa_sig_sign(const secp256k1_ecmult_gen_context *ctx, secp256k1_scalar* r, secp256k1_scalar* s, const secp256k1_scalar *seckey, const secp256k1_scalar *message, const secp256k1_scalar *nonce, int *recid);
+static int kaspa_secp256k1_ecdsa_sig_parse(kaspa_secp256k1_scalar *r, kaspa_secp256k1_scalar *s, const unsigned char *sig, size_t size);
+static int kaspa_secp256k1_ecdsa_sig_serialize(unsigned char *sig, size_t *size, const kaspa_secp256k1_scalar *r, const kaspa_secp256k1_scalar *s);
+static int kaspa_secp256k1_ecdsa_sig_verify(const kaspa_secp256k1_ecmult_context *ctx, const kaspa_secp256k1_scalar* r, const kaspa_secp256k1_scalar* s, const kaspa_secp256k1_ge *pubkey, const kaspa_secp256k1_scalar *message);
+static int kaspa_secp256k1_ecdsa_sig_sign(const kaspa_secp256k1_ecmult_gen_context *ctx, kaspa_secp256k1_scalar* r, kaspa_secp256k1_scalar* s, const kaspa_secp256k1_scalar *seckey, const kaspa_secp256k1_scalar *message, const kaspa_secp256k1_scalar *nonce, int *recid);
 
-#endif /* SECP256K1_ECDSA_H */
+#endif /* kaspa_secp256k1_ECDSA_H */

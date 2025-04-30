@@ -4,8 +4,8 @@
  * file COPYING or https://www.opensource.org/licenses/mit-license.php.*
  **********************************************************************/
 
-#ifndef SECP256K1_MODINV64_IMPL_H
-#define SECP256K1_MODINV64_IMPL_H
+#ifndef kaspa_secp256k1_MODINV64_IMPL_H
+#define kaspa_secp256k1_MODINV64_IMPL_H
 
 #include "modinv64.h"
 
@@ -21,16 +21,16 @@
 #ifdef VERIFY
 /* Helper function to compute the absolute value of an int64_t.
  * (we don't use abs/labs/llabs as it depends on the int sizes). */
-static int64_t secp256k1_modinv64_abs(int64_t v) {
+static int64_t kaspa_secp256k1_modinv64_abs(int64_t v) {
     VERIFY_CHECK(v > INT64_MIN);
     if (v < 0) return -v;
     return v;
 }
 
-static const secp256k1_modinv64_signed62 SECP256K1_SIGNED62_ONE = {{1}};
+static const kaspa_secp256k1_modinv64_signed62 kaspa_secp256k1_SIGNED62_ONE = {{1}};
 
 /* Compute a*factor and put it in r. All but the top limb in r will be in range [0,2^62). */
-static void secp256k1_modinv64_mul_62(secp256k1_modinv64_signed62 *r, const secp256k1_modinv64_signed62 *a, int alen, int64_t factor) {
+static void kaspa_secp256k1_modinv64_mul_62(kaspa_secp256k1_modinv64_signed62 *r, const kaspa_secp256k1_modinv64_signed62 *a, int alen, int64_t factor) {
     const int64_t M62 = (int64_t)(UINT64_MAX >> 2);
     int128_t c = 0;
     int i;
@@ -44,11 +44,11 @@ static void secp256k1_modinv64_mul_62(secp256k1_modinv64_signed62 *r, const secp
 }
 
 /* Return -1 for a<b*factor, 0 for a==b*factor, 1 for a>b*factor. A has alen limbs; b has 5. */
-static int secp256k1_modinv64_mul_cmp_62(const secp256k1_modinv64_signed62 *a, int alen, const secp256k1_modinv64_signed62 *b, int64_t factor) {
+static int kaspa_secp256k1_modinv64_mul_cmp_62(const kaspa_secp256k1_modinv64_signed62 *a, int alen, const kaspa_secp256k1_modinv64_signed62 *b, int64_t factor) {
     int i;
-    secp256k1_modinv64_signed62 am, bm;
-    secp256k1_modinv64_mul_62(&am, a, alen, 1); /* Normalize all but the top limb of a. */
-    secp256k1_modinv64_mul_62(&bm, b, 5, factor);
+    kaspa_secp256k1_modinv64_signed62 am, bm;
+    kaspa_secp256k1_modinv64_mul_62(&am, a, alen, 1); /* Normalize all but the top limb of a. */
+    kaspa_secp256k1_modinv64_mul_62(&bm, b, 5, factor);
     for (i = 0; i < 4; ++i) {
         /* Verify that all but the top limb of a and b are normalized. */
         VERIFY_CHECK(am.v[i] >> 62 == 0);
@@ -66,7 +66,7 @@ static int secp256k1_modinv64_mul_cmp_62(const secp256k1_modinv64_signed62 *a, i
  * to it to bring it to range [0,modulus). If sign < 0, the input will also be negated in the
  * process. The input must have limbs in range (-2^62,2^62). The output will have limbs in range
  * [0,2^62). */
-static void secp256k1_modinv64_normalize_62(secp256k1_modinv64_signed62 *r, int64_t sign, const secp256k1_modinv64_modinfo *modinfo) {
+static void kaspa_secp256k1_modinv64_normalize_62(kaspa_secp256k1_modinv64_signed62 *r, int64_t sign, const kaspa_secp256k1_modinv64_modinfo *modinfo) {
     const int64_t M62 = (int64_t)(UINT64_MAX >> 2);
     int64_t r0 = r->v[0], r1 = r->v[1], r2 = r->v[2], r3 = r->v[3], r4 = r->v[4];
     int64_t cond_add, cond_negate;
@@ -78,8 +78,8 @@ static void secp256k1_modinv64_normalize_62(secp256k1_modinv64_signed62 *r, int6
         VERIFY_CHECK(r->v[i] >= -M62);
         VERIFY_CHECK(r->v[i] <= M62);
     }
-    VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(r, 5, &modinfo->modulus, -2) > 0); /* r > -2*modulus */
-    VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(r, 5, &modinfo->modulus, 1) < 0); /* r < modulus */
+    VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(r, 5, &modinfo->modulus, -2) > 0); /* r > -2*modulus */
+    VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(r, 5, &modinfo->modulus, 1) < 0); /* r < modulus */
 #endif
 
     /* In a first step, add the modulus if the input is negative, and then negate if requested.
@@ -131,8 +131,8 @@ static void secp256k1_modinv64_normalize_62(secp256k1_modinv64_signed62 *r, int6
     VERIFY_CHECK(r2 >> 62 == 0);
     VERIFY_CHECK(r3 >> 62 == 0);
     VERIFY_CHECK(r4 >> 62 == 0);
-    VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(r, 5, &modinfo->modulus, 0) >= 0); /* r >= 0 */
-    VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(r, 5, &modinfo->modulus, 1) < 0); /* r < modulus */
+    VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(r, 5, &modinfo->modulus, 0) >= 0); /* r >= 0 */
+    VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(r, 5, &modinfo->modulus, 1) < 0); /* r < modulus */
 #endif
 }
 
@@ -143,7 +143,7 @@ static void secp256k1_modinv64_normalize_62(secp256k1_modinv64_signed62 *r, int6
  */
 typedef struct {
     int64_t u, v, q, r;
-} secp256k1_modinv64_trans2x2;
+} kaspa_secp256k1_modinv64_trans2x2;
 
 /* Compute the transition matrix and eta for 62 divsteps.
  *
@@ -155,7 +155,7 @@ typedef struct {
  *
  * Implements the divsteps_n_matrix function from the explanation.
  */
-static int64_t secp256k1_modinv64_divsteps_62(int64_t eta, uint64_t f0, uint64_t g0, secp256k1_modinv64_trans2x2 *t) {
+static int64_t kaspa_secp256k1_modinv64_divsteps_62(int64_t eta, uint64_t f0, uint64_t g0, kaspa_secp256k1_modinv64_trans2x2 *t) {
     /* u,v,q,r are the elements of the transformation matrix being built up,
      * starting with the identity matrix. Semantically they are signed integers
      * in range [-2^62,2^62], but here represented as unsigned mod 2^64. This
@@ -219,8 +219,8 @@ static int64_t secp256k1_modinv64_divsteps_62(int64_t eta, uint64_t f0, uint64_t
  *
  * Implements the divsteps_n_matrix_var function from the explanation.
  */
-static int64_t secp256k1_modinv64_divsteps_62_var(int64_t eta, uint64_t f0, uint64_t g0, secp256k1_modinv64_trans2x2 *t) {
-    /* Transformation matrix; see comments in secp256k1_modinv64_divsteps_62. */
+static int64_t kaspa_secp256k1_modinv64_divsteps_62_var(int64_t eta, uint64_t f0, uint64_t g0, kaspa_secp256k1_modinv64_trans2x2 *t) {
+    /* Transformation matrix; see comments in kaspa_secp256k1_modinv64_divsteps_62. */
     uint64_t u = 1, v = 0, q = 0, r = 1;
     uint64_t f = f0, g = g0, m;
     uint32_t w;
@@ -228,7 +228,7 @@ static int64_t secp256k1_modinv64_divsteps_62_var(int64_t eta, uint64_t f0, uint
 
     for (;;) {
         /* Use a sentinel bit to count zeros only up to i. */
-        zeros = secp256k1_ctz64_var(g | (UINT64_MAX << i));
+        zeros = kaspa_secp256k1_ctz64_var(g | (UINT64_MAX << i));
         /* Perform zeros divsteps at once; they all just divide g by two. */
         g >>= zeros;
         u <<= zeros;
@@ -297,7 +297,7 @@ static int64_t secp256k1_modinv64_divsteps_62_var(int64_t eta, uint64_t f0, uint
  *
  * This implements the update_de function from the explanation.
  */
-static void secp256k1_modinv64_update_de_62(secp256k1_modinv64_signed62 *d, secp256k1_modinv64_signed62 *e, const secp256k1_modinv64_trans2x2 *t, const secp256k1_modinv64_modinfo* modinfo) {
+static void kaspa_secp256k1_modinv64_update_de_62(kaspa_secp256k1_modinv64_signed62 *d, kaspa_secp256k1_modinv64_signed62 *e, const kaspa_secp256k1_modinv64_trans2x2 *t, const kaspa_secp256k1_modinv64_modinfo* modinfo) {
     const int64_t M62 = (int64_t)(UINT64_MAX >> 2);
     const int64_t d0 = d->v[0], d1 = d->v[1], d2 = d->v[2], d3 = d->v[3], d4 = d->v[4];
     const int64_t e0 = e->v[0], e1 = e->v[1], e2 = e->v[2], e3 = e->v[3], e4 = e->v[4];
@@ -305,14 +305,14 @@ static void secp256k1_modinv64_update_de_62(secp256k1_modinv64_signed62 *d, secp
     int64_t md, me, sd, se;
     int128_t cd, ce;
 #ifdef VERIFY
-    VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(d, 5, &modinfo->modulus, -2) > 0); /* d > -2*modulus */
-    VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(d, 5, &modinfo->modulus, 1) < 0);  /* d <    modulus */
-    VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(e, 5, &modinfo->modulus, -2) > 0); /* e > -2*modulus */
-    VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(e, 5, &modinfo->modulus, 1) < 0);  /* e <    modulus */
-    VERIFY_CHECK((secp256k1_modinv64_abs(u) + secp256k1_modinv64_abs(v)) >= 0); /* |u|+|v| doesn't overflow */
-    VERIFY_CHECK((secp256k1_modinv64_abs(q) + secp256k1_modinv64_abs(r)) >= 0); /* |q|+|r| doesn't overflow */
-    VERIFY_CHECK((secp256k1_modinv64_abs(u) + secp256k1_modinv64_abs(v)) <= M62 + 1); /* |u|+|v| <= 2^62 */
-    VERIFY_CHECK((secp256k1_modinv64_abs(q) + secp256k1_modinv64_abs(r)) <= M62 + 1); /* |q|+|r| <= 2^62 */
+    VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(d, 5, &modinfo->modulus, -2) > 0); /* d > -2*modulus */
+    VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(d, 5, &modinfo->modulus, 1) < 0);  /* d <    modulus */
+    VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(e, 5, &modinfo->modulus, -2) > 0); /* e > -2*modulus */
+    VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(e, 5, &modinfo->modulus, 1) < 0);  /* e <    modulus */
+    VERIFY_CHECK((kaspa_secp256k1_modinv64_abs(u) + kaspa_secp256k1_modinv64_abs(v)) >= 0); /* |u|+|v| doesn't overflow */
+    VERIFY_CHECK((kaspa_secp256k1_modinv64_abs(q) + kaspa_secp256k1_modinv64_abs(r)) >= 0); /* |q|+|r| doesn't overflow */
+    VERIFY_CHECK((kaspa_secp256k1_modinv64_abs(u) + kaspa_secp256k1_modinv64_abs(v)) <= M62 + 1); /* |u|+|v| <= 2^62 */
+    VERIFY_CHECK((kaspa_secp256k1_modinv64_abs(q) + kaspa_secp256k1_modinv64_abs(r)) <= M62 + 1); /* |q|+|r| <= 2^62 */
 #endif
     /* [md,me] start as zero; plus [u,q] if d is negative; plus [v,r] if e is negative. */
     sd = d4 >> 63;
@@ -369,10 +369,10 @@ static void secp256k1_modinv64_update_de_62(secp256k1_modinv64_signed62 *d, secp
     d->v[4] = (int64_t)cd;
     e->v[4] = (int64_t)ce;
 #ifdef VERIFY
-    VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(d, 5, &modinfo->modulus, -2) > 0); /* d > -2*modulus */
-    VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(d, 5, &modinfo->modulus, 1) < 0);  /* d <    modulus */
-    VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(e, 5, &modinfo->modulus, -2) > 0); /* e > -2*modulus */
-    VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(e, 5, &modinfo->modulus, 1) < 0);  /* e <    modulus */
+    VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(d, 5, &modinfo->modulus, -2) > 0); /* d > -2*modulus */
+    VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(d, 5, &modinfo->modulus, 1) < 0);  /* d <    modulus */
+    VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(e, 5, &modinfo->modulus, -2) > 0); /* e > -2*modulus */
+    VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(e, 5, &modinfo->modulus, 1) < 0);  /* e <    modulus */
 #endif
 }
 
@@ -380,7 +380,7 @@ static void secp256k1_modinv64_update_de_62(secp256k1_modinv64_signed62 *d, secp
  *
  * This implements the update_fg function from the explanation.
  */
-static void secp256k1_modinv64_update_fg_62(secp256k1_modinv64_signed62 *f, secp256k1_modinv64_signed62 *g, const secp256k1_modinv64_trans2x2 *t) {
+static void kaspa_secp256k1_modinv64_update_fg_62(kaspa_secp256k1_modinv64_signed62 *f, kaspa_secp256k1_modinv64_signed62 *g, const kaspa_secp256k1_modinv64_trans2x2 *t) {
     const int64_t M62 = (int64_t)(UINT64_MAX >> 2);
     const int64_t f0 = f->v[0], f1 = f->v[1], f2 = f->v[2], f3 = f->v[3], f4 = f->v[4];
     const int64_t g0 = g->v[0], g1 = g->v[1], g2 = g->v[2], g3 = g->v[3], g4 = g->v[4];
@@ -423,7 +423,7 @@ static void secp256k1_modinv64_update_fg_62(secp256k1_modinv64_signed62 *f, secp
  *
  * This implements the update_fg function from the explanation.
  */
-static void secp256k1_modinv64_update_fg_62_var(int len, secp256k1_modinv64_signed62 *f, secp256k1_modinv64_signed62 *g, const secp256k1_modinv64_trans2x2 *t) {
+static void kaspa_secp256k1_modinv64_update_fg_62_var(int len, kaspa_secp256k1_modinv64_signed62 *f, kaspa_secp256k1_modinv64_signed62 *g, const kaspa_secp256k1_modinv64_trans2x2 *t) {
     const int64_t M62 = (int64_t)(UINT64_MAX >> 2);
     const int64_t u = t->u, v = t->v, q = t->q, r = t->r;
     int64_t fi, gi;
@@ -454,35 +454,35 @@ static void secp256k1_modinv64_update_fg_62_var(int len, secp256k1_modinv64_sign
 }
 
 /* Compute the inverse of x modulo modinfo->modulus, and replace x with it (constant time in x). */
-static void secp256k1_modinv64(secp256k1_modinv64_signed62 *x, const secp256k1_modinv64_modinfo *modinfo) {
+static void kaspa_secp256k1_modinv64(kaspa_secp256k1_modinv64_signed62 *x, const kaspa_secp256k1_modinv64_modinfo *modinfo) {
     /* Start with d=0, e=1, f=modulus, g=x, eta=-1. */
-    secp256k1_modinv64_signed62 d = {{0, 0, 0, 0, 0}};
-    secp256k1_modinv64_signed62 e = {{1, 0, 0, 0, 0}};
-    secp256k1_modinv64_signed62 f = modinfo->modulus;
-    secp256k1_modinv64_signed62 g = *x;
+    kaspa_secp256k1_modinv64_signed62 d = {{0, 0, 0, 0, 0}};
+    kaspa_secp256k1_modinv64_signed62 e = {{1, 0, 0, 0, 0}};
+    kaspa_secp256k1_modinv64_signed62 f = modinfo->modulus;
+    kaspa_secp256k1_modinv64_signed62 g = *x;
     int i;
     int64_t eta = -1;
 
     /* Do 12 iterations of 62 divsteps each = 744 divsteps. 724 suffices for 256-bit inputs. */
     for (i = 0; i < 12; ++i) {
         /* Compute transition matrix and new eta after 62 divsteps. */
-        secp256k1_modinv64_trans2x2 t;
-        eta = secp256k1_modinv64_divsteps_62(eta, f.v[0], g.v[0], &t);
+        kaspa_secp256k1_modinv64_trans2x2 t;
+        eta = kaspa_secp256k1_modinv64_divsteps_62(eta, f.v[0], g.v[0], &t);
         /* Update d,e using that transition matrix. */
-        secp256k1_modinv64_update_de_62(&d, &e, &t, modinfo);
+        kaspa_secp256k1_modinv64_update_de_62(&d, &e, &t, modinfo);
         /* Update f,g using that transition matrix. */
 #ifdef VERIFY
-        VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&f, 5, &modinfo->modulus, -1) > 0); /* f > -modulus */
-        VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&f, 5, &modinfo->modulus, 1) <= 0); /* f <= modulus */
-        VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&g, 5, &modinfo->modulus, -1) > 0); /* g > -modulus */
-        VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&g, 5, &modinfo->modulus, 1) < 0);  /* g <  modulus */
+        VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&f, 5, &modinfo->modulus, -1) > 0); /* f > -modulus */
+        VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&f, 5, &modinfo->modulus, 1) <= 0); /* f <= modulus */
+        VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&g, 5, &modinfo->modulus, -1) > 0); /* g > -modulus */
+        VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&g, 5, &modinfo->modulus, 1) < 0);  /* g <  modulus */
 #endif
-        secp256k1_modinv64_update_fg_62(&f, &g, &t);
+        kaspa_secp256k1_modinv64_update_fg_62(&f, &g, &t);
 #ifdef VERIFY
-        VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&f, 5, &modinfo->modulus, -1) > 0); /* f > -modulus */
-        VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&f, 5, &modinfo->modulus, 1) <= 0); /* f <= modulus */
-        VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&g, 5, &modinfo->modulus, -1) > 0); /* g > -modulus */
-        VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&g, 5, &modinfo->modulus, 1) < 0);  /* g <  modulus */
+        VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&f, 5, &modinfo->modulus, -1) > 0); /* f > -modulus */
+        VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&f, 5, &modinfo->modulus, 1) <= 0); /* f <= modulus */
+        VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&g, 5, &modinfo->modulus, -1) > 0); /* g > -modulus */
+        VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&g, 5, &modinfo->modulus, 1) < 0);  /* g <  modulus */
 #endif
     }
 
@@ -491,28 +491,28 @@ static void secp256k1_modinv64(secp256k1_modinv64_signed62 *x, const secp256k1_m
      * values i.e. +/- 1, and d now contains +/- the modular inverse. */
 #ifdef VERIFY
     /* g == 0 */
-    VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&g, 5, &SECP256K1_SIGNED62_ONE, 0) == 0);
+    VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&g, 5, &kaspa_secp256k1_SIGNED62_ONE, 0) == 0);
     /* |f| == 1, or (x == 0 and d == 0 and |f|=modulus) */
-    VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&f, 5, &SECP256K1_SIGNED62_ONE, -1) == 0 ||
-                 secp256k1_modinv64_mul_cmp_62(&f, 5, &SECP256K1_SIGNED62_ONE, 1) == 0 ||
-                 (secp256k1_modinv64_mul_cmp_62(x, 5, &SECP256K1_SIGNED62_ONE, 0) == 0 &&
-                  secp256k1_modinv64_mul_cmp_62(&d, 5, &SECP256K1_SIGNED62_ONE, 0) == 0 &&
-                  (secp256k1_modinv64_mul_cmp_62(&f, 5, &modinfo->modulus, 1) == 0 ||
-                   secp256k1_modinv64_mul_cmp_62(&f, 5, &modinfo->modulus, -1) == 0)));
+    VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&f, 5, &kaspa_secp256k1_SIGNED62_ONE, -1) == 0 ||
+                 kaspa_secp256k1_modinv64_mul_cmp_62(&f, 5, &kaspa_secp256k1_SIGNED62_ONE, 1) == 0 ||
+                 (kaspa_secp256k1_modinv64_mul_cmp_62(x, 5, &kaspa_secp256k1_SIGNED62_ONE, 0) == 0 &&
+                  kaspa_secp256k1_modinv64_mul_cmp_62(&d, 5, &kaspa_secp256k1_SIGNED62_ONE, 0) == 0 &&
+                  (kaspa_secp256k1_modinv64_mul_cmp_62(&f, 5, &modinfo->modulus, 1) == 0 ||
+                   kaspa_secp256k1_modinv64_mul_cmp_62(&f, 5, &modinfo->modulus, -1) == 0)));
 #endif
 
     /* Optionally negate d, normalize to [0,modulus), and return it. */
-    secp256k1_modinv64_normalize_62(&d, f.v[4], modinfo);
+    kaspa_secp256k1_modinv64_normalize_62(&d, f.v[4], modinfo);
     *x = d;
 }
 
 /* Compute the inverse of x modulo modinfo->modulus, and replace x with it (variable time). */
-static void secp256k1_modinv64_var(secp256k1_modinv64_signed62 *x, const secp256k1_modinv64_modinfo *modinfo) {
+static void kaspa_secp256k1_modinv64_var(kaspa_secp256k1_modinv64_signed62 *x, const kaspa_secp256k1_modinv64_modinfo *modinfo) {
     /* Start with d=0, e=1, f=modulus, g=x, eta=-1. */
-    secp256k1_modinv64_signed62 d = {{0, 0, 0, 0, 0}};
-    secp256k1_modinv64_signed62 e = {{1, 0, 0, 0, 0}};
-    secp256k1_modinv64_signed62 f = modinfo->modulus;
-    secp256k1_modinv64_signed62 g = *x;
+    kaspa_secp256k1_modinv64_signed62 d = {{0, 0, 0, 0, 0}};
+    kaspa_secp256k1_modinv64_signed62 e = {{1, 0, 0, 0, 0}};
+    kaspa_secp256k1_modinv64_signed62 f = modinfo->modulus;
+    kaspa_secp256k1_modinv64_signed62 g = *x;
 #ifdef VERIFY
     int i = 0;
 #endif
@@ -523,18 +523,18 @@ static void secp256k1_modinv64_var(secp256k1_modinv64_signed62 *x, const secp256
     /* Do iterations of 62 divsteps each until g=0. */
     while (1) {
         /* Compute transition matrix and new eta after 62 divsteps. */
-        secp256k1_modinv64_trans2x2 t;
-        eta = secp256k1_modinv64_divsteps_62_var(eta, f.v[0], g.v[0], &t);
+        kaspa_secp256k1_modinv64_trans2x2 t;
+        eta = kaspa_secp256k1_modinv64_divsteps_62_var(eta, f.v[0], g.v[0], &t);
         /* Update d,e using that transition matrix. */
-        secp256k1_modinv64_update_de_62(&d, &e, &t, modinfo);
+        kaspa_secp256k1_modinv64_update_de_62(&d, &e, &t, modinfo);
         /* Update f,g using that transition matrix. */
 #ifdef VERIFY
-        VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&f, len, &modinfo->modulus, -1) > 0); /* f > -modulus */
-        VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&f, len, &modinfo->modulus, 1) <= 0); /* f <= modulus */
-        VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&g, len, &modinfo->modulus, -1) > 0); /* g > -modulus */
-        VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&g, len, &modinfo->modulus, 1) < 0);  /* g <  modulus */
+        VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&f, len, &modinfo->modulus, -1) > 0); /* f > -modulus */
+        VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&f, len, &modinfo->modulus, 1) <= 0); /* f <= modulus */
+        VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&g, len, &modinfo->modulus, -1) > 0); /* g > -modulus */
+        VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&g, len, &modinfo->modulus, 1) < 0);  /* g <  modulus */
 #endif
-        secp256k1_modinv64_update_fg_62_var(len, &f, &g, &t);
+        kaspa_secp256k1_modinv64_update_fg_62_var(len, &f, &g, &t);
         /* If the bottom limb of g is zero, there is a chance that g=0. */
         if (g.v[0] == 0) {
             cond = 0;
@@ -560,10 +560,10 @@ static void secp256k1_modinv64_var(secp256k1_modinv64_signed62 *x, const secp256
         }
 #ifdef VERIFY
         VERIFY_CHECK(++i < 12); /* We should never need more than 12*62 = 744 divsteps */
-        VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&f, len, &modinfo->modulus, -1) > 0); /* f > -modulus */
-        VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&f, len, &modinfo->modulus, 1) <= 0); /* f <= modulus */
-        VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&g, len, &modinfo->modulus, -1) > 0); /* g > -modulus */
-        VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&g, len, &modinfo->modulus, 1) < 0);  /* g <  modulus */
+        VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&f, len, &modinfo->modulus, -1) > 0); /* f > -modulus */
+        VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&f, len, &modinfo->modulus, 1) <= 0); /* f <= modulus */
+        VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&g, len, &modinfo->modulus, -1) > 0); /* g > -modulus */
+        VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&g, len, &modinfo->modulus, 1) < 0);  /* g <  modulus */
 #endif
     }
 
@@ -571,19 +571,19 @@ static void secp256k1_modinv64_var(secp256k1_modinv64_signed62 *x, const secp256
      * the initial f, g values i.e. +/- 1, and d now contains +/- the modular inverse. */
 #ifdef VERIFY
     /* g == 0 */
-    VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&g, len, &SECP256K1_SIGNED62_ONE, 0) == 0);
+    VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&g, len, &kaspa_secp256k1_SIGNED62_ONE, 0) == 0);
     /* |f| == 1, or (x == 0 and d == 0 and |f|=modulus) */
-    VERIFY_CHECK(secp256k1_modinv64_mul_cmp_62(&f, len, &SECP256K1_SIGNED62_ONE, -1) == 0 ||
-                 secp256k1_modinv64_mul_cmp_62(&f, len, &SECP256K1_SIGNED62_ONE, 1) == 0 ||
-                 (secp256k1_modinv64_mul_cmp_62(x, 5, &SECP256K1_SIGNED62_ONE, 0) == 0 &&
-                  secp256k1_modinv64_mul_cmp_62(&d, 5, &SECP256K1_SIGNED62_ONE, 0) == 0 &&
-                  (secp256k1_modinv64_mul_cmp_62(&f, len, &modinfo->modulus, 1) == 0 ||
-                   secp256k1_modinv64_mul_cmp_62(&f, len, &modinfo->modulus, -1) == 0)));
+    VERIFY_CHECK(kaspa_secp256k1_modinv64_mul_cmp_62(&f, len, &kaspa_secp256k1_SIGNED62_ONE, -1) == 0 ||
+                 kaspa_secp256k1_modinv64_mul_cmp_62(&f, len, &kaspa_secp256k1_SIGNED62_ONE, 1) == 0 ||
+                 (kaspa_secp256k1_modinv64_mul_cmp_62(x, 5, &kaspa_secp256k1_SIGNED62_ONE, 0) == 0 &&
+                  kaspa_secp256k1_modinv64_mul_cmp_62(&d, 5, &kaspa_secp256k1_SIGNED62_ONE, 0) == 0 &&
+                  (kaspa_secp256k1_modinv64_mul_cmp_62(&f, len, &modinfo->modulus, 1) == 0 ||
+                   kaspa_secp256k1_modinv64_mul_cmp_62(&f, len, &modinfo->modulus, -1) == 0)));
 #endif
 
     /* Optionally negate d, normalize to [0,modulus), and return it. */
-    secp256k1_modinv64_normalize_62(&d, f.v[len - 1], modinfo);
+    kaspa_secp256k1_modinv64_normalize_62(&d, f.v[len - 1], modinfo);
     *x = d;
 }
 
-#endif /* SECP256K1_MODINV64_IMPL_H */
+#endif /* kaspa_secp256k1_MODINV64_IMPL_H */

@@ -4,8 +4,8 @@
  * file COPYING or https://www.opensource.org/licenses/mit-license.php.*
  ***********************************************************************/
 
-#ifndef SECP256K1_FIELD_REPR_IMPL_H
-#define SECP256K1_FIELD_REPR_IMPL_H
+#ifndef kaspa_secp256k1_FIELD_REPR_IMPL_H
+#define kaspa_secp256k1_FIELD_REPR_IMPL_H
 
 #if defined HAVE_CONFIG_H
 #include "libsecp256k1-config.h"
@@ -30,7 +30,7 @@
  */
 
 #ifdef VERIFY
-static void secp256k1_fe_verify(const secp256k1_fe *a) {
+static void kaspa_secp256k1_fe_verify(const kaspa_secp256k1_fe *a) {
     const uint64_t *d = a->n;
     int m = a->normalized ? 1 : 2 * a->magnitude, r = 1;
    /* secp256k1 'p' value defined in "Standards for Efficient Cryptography" (SEC2) 2.7.1. */
@@ -51,7 +51,7 @@ static void secp256k1_fe_verify(const secp256k1_fe *a) {
 }
 #endif
 
-static void secp256k1_fe_normalize(secp256k1_fe *r) {
+static void kaspa_secp256k1_fe_normalize(kaspa_secp256k1_fe *r) {
     uint64_t t0 = r->n[0], t1 = r->n[1], t2 = r->n[2], t3 = r->n[3], t4 = r->n[4];
 
     /* Reduce t4 at the start so there will be at most a single carry from the first pass */
@@ -90,11 +90,11 @@ static void secp256k1_fe_normalize(secp256k1_fe *r) {
 #ifdef VERIFY
     r->magnitude = 1;
     r->normalized = 1;
-    secp256k1_fe_verify(r);
+    kaspa_secp256k1_fe_verify(r);
 #endif
 }
 
-static void secp256k1_fe_normalize_weak(secp256k1_fe *r) {
+static void kaspa_secp256k1_fe_normalize_weak(kaspa_secp256k1_fe *r) {
     uint64_t t0 = r->n[0], t1 = r->n[1], t2 = r->n[2], t3 = r->n[3], t4 = r->n[4];
 
     /* Reduce t4 at the start so there will be at most a single carry from the first pass */
@@ -114,11 +114,11 @@ static void secp256k1_fe_normalize_weak(secp256k1_fe *r) {
 
 #ifdef VERIFY
     r->magnitude = 1;
-    secp256k1_fe_verify(r);
+    kaspa_secp256k1_fe_verify(r);
 #endif
 }
 
-static void secp256k1_fe_normalize_var(secp256k1_fe *r) {
+static void kaspa_secp256k1_fe_normalize_var(kaspa_secp256k1_fe *r) {
     uint64_t t0 = r->n[0], t1 = r->n[1], t2 = r->n[2], t3 = r->n[3], t4 = r->n[4];
 
     /* Reduce t4 at the start so there will be at most a single carry from the first pass */
@@ -158,11 +158,11 @@ static void secp256k1_fe_normalize_var(secp256k1_fe *r) {
 #ifdef VERIFY
     r->magnitude = 1;
     r->normalized = 1;
-    secp256k1_fe_verify(r);
+    kaspa_secp256k1_fe_verify(r);
 #endif
 }
 
-static int secp256k1_fe_normalizes_to_zero(secp256k1_fe *r) {
+static int kaspa_secp256k1_fe_normalizes_to_zero(kaspa_secp256k1_fe *r) {
     uint64_t t0 = r->n[0], t1 = r->n[1], t2 = r->n[2], t3 = r->n[3], t4 = r->n[4];
 
     /* z0 tracks a possible raw value of 0, z1 tracks a possible raw value of P */
@@ -185,7 +185,7 @@ static int secp256k1_fe_normalizes_to_zero(secp256k1_fe *r) {
     return (z0 == 0) | (z1 == 0xFFFFFFFFFFFFFULL);
 }
 
-static int secp256k1_fe_normalizes_to_zero_var(secp256k1_fe *r) {
+static int kaspa_secp256k1_fe_normalizes_to_zero_var(kaspa_secp256k1_fe *r) {
     uint64_t t0, t1, t2, t3, t4;
     uint64_t z0, z1;
     uint64_t x;
@@ -226,34 +226,34 @@ static int secp256k1_fe_normalizes_to_zero_var(secp256k1_fe *r) {
     return (z0 == 0) | (z1 == 0xFFFFFFFFFFFFFULL);
 }
 
-SECP256K1_INLINE static void secp256k1_fe_set_int(secp256k1_fe *r, int a) {
+kaspa_secp256k1_INLINE static void kaspa_secp256k1_fe_set_int(kaspa_secp256k1_fe *r, int a) {
     r->n[0] = a;
     r->n[1] = r->n[2] = r->n[3] = r->n[4] = 0;
 #ifdef VERIFY
     r->magnitude = 1;
     r->normalized = 1;
-    secp256k1_fe_verify(r);
+    kaspa_secp256k1_fe_verify(r);
 #endif
 }
 
-SECP256K1_INLINE static int secp256k1_fe_is_zero(const secp256k1_fe *a) {
+kaspa_secp256k1_INLINE static int kaspa_secp256k1_fe_is_zero(const kaspa_secp256k1_fe *a) {
     const uint64_t *t = a->n;
 #ifdef VERIFY
     VERIFY_CHECK(a->normalized);
-    secp256k1_fe_verify(a);
+    kaspa_secp256k1_fe_verify(a);
 #endif
     return (t[0] | t[1] | t[2] | t[3] | t[4]) == 0;
 }
 
-SECP256K1_INLINE static int secp256k1_fe_is_odd(const secp256k1_fe *a) {
+kaspa_secp256k1_INLINE static int kaspa_secp256k1_fe_is_odd(const kaspa_secp256k1_fe *a) {
 #ifdef VERIFY
     VERIFY_CHECK(a->normalized);
-    secp256k1_fe_verify(a);
+    kaspa_secp256k1_fe_verify(a);
 #endif
     return a->n[0] & 1;
 }
 
-SECP256K1_INLINE static void secp256k1_fe_clear(secp256k1_fe *a) {
+kaspa_secp256k1_INLINE static void kaspa_secp256k1_fe_clear(kaspa_secp256k1_fe *a) {
     int i;
 #ifdef VERIFY
     a->magnitude = 0;
@@ -264,13 +264,13 @@ SECP256K1_INLINE static void secp256k1_fe_clear(secp256k1_fe *a) {
     }
 }
 
-static int secp256k1_fe_cmp_var(const secp256k1_fe *a, const secp256k1_fe *b) {
+static int kaspa_secp256k1_fe_cmp_var(const kaspa_secp256k1_fe *a, const kaspa_secp256k1_fe *b) {
     int i;
 #ifdef VERIFY
     VERIFY_CHECK(a->normalized);
     VERIFY_CHECK(b->normalized);
-    secp256k1_fe_verify(a);
-    secp256k1_fe_verify(b);
+    kaspa_secp256k1_fe_verify(a);
+    kaspa_secp256k1_fe_verify(b);
 #endif
     for (i = 4; i >= 0; i--) {
         if (a->n[i] > b->n[i]) {
@@ -283,7 +283,7 @@ static int secp256k1_fe_cmp_var(const secp256k1_fe *a, const secp256k1_fe *b) {
     return 0;
 }
 
-static int secp256k1_fe_set_b32(secp256k1_fe *r, const unsigned char *a) {
+static int kaspa_secp256k1_fe_set_b32(kaspa_secp256k1_fe *r, const unsigned char *a) {
     int ret;
     r->n[0] = (uint64_t)a[31]
             | ((uint64_t)a[30] << 8)
@@ -324,7 +324,7 @@ static int secp256k1_fe_set_b32(secp256k1_fe *r, const unsigned char *a) {
     r->magnitude = 1;
     if (ret) {
         r->normalized = 1;
-        secp256k1_fe_verify(r);
+        kaspa_secp256k1_fe_verify(r);
     } else {
         r->normalized = 0;
     }
@@ -333,10 +333,10 @@ static int secp256k1_fe_set_b32(secp256k1_fe *r, const unsigned char *a) {
 }
 
 /** Convert a field element to a 32-byte big endian value. Requires the input to be normalized */
-static void secp256k1_fe_get_b32(unsigned char *r, const secp256k1_fe *a) {
+static void kaspa_secp256k1_fe_get_b32(unsigned char *r, const kaspa_secp256k1_fe *a) {
 #ifdef VERIFY
     VERIFY_CHECK(a->normalized);
-    secp256k1_fe_verify(a);
+    kaspa_secp256k1_fe_verify(a);
 #endif
     r[0] = (a->n[4] >> 40) & 0xFF;
     r[1] = (a->n[4] >> 32) & 0xFF;
@@ -372,10 +372,10 @@ static void secp256k1_fe_get_b32(unsigned char *r, const secp256k1_fe *a) {
     r[31] = a->n[0] & 0xFF;
 }
 
-SECP256K1_INLINE static void secp256k1_fe_negate(secp256k1_fe *r, const secp256k1_fe *a, int m) {
+kaspa_secp256k1_INLINE static void kaspa_secp256k1_fe_negate(kaspa_secp256k1_fe *r, const kaspa_secp256k1_fe *a, int m) {
 #ifdef VERIFY
     VERIFY_CHECK(a->magnitude <= m);
-    secp256k1_fe_verify(a);
+    kaspa_secp256k1_fe_verify(a);
 #endif
     r->n[0] = 0xFFFFEFFFFFC2FULL * 2 * (m + 1) - a->n[0];
     r->n[1] = 0xFFFFFFFFFFFFFULL * 2 * (m + 1) - a->n[1];
@@ -385,11 +385,11 @@ SECP256K1_INLINE static void secp256k1_fe_negate(secp256k1_fe *r, const secp256k
 #ifdef VERIFY
     r->magnitude = m + 1;
     r->normalized = 0;
-    secp256k1_fe_verify(r);
+    kaspa_secp256k1_fe_verify(r);
 #endif
 }
 
-SECP256K1_INLINE static void secp256k1_fe_mul_int(secp256k1_fe *r, int a) {
+kaspa_secp256k1_INLINE static void kaspa_secp256k1_fe_mul_int(kaspa_secp256k1_fe *r, int a) {
     r->n[0] *= a;
     r->n[1] *= a;
     r->n[2] *= a;
@@ -398,13 +398,13 @@ SECP256K1_INLINE static void secp256k1_fe_mul_int(secp256k1_fe *r, int a) {
 #ifdef VERIFY
     r->magnitude *= a;
     r->normalized = 0;
-    secp256k1_fe_verify(r);
+    kaspa_secp256k1_fe_verify(r);
 #endif
 }
 
-SECP256K1_INLINE static void secp256k1_fe_add(secp256k1_fe *r, const secp256k1_fe *a) {
+kaspa_secp256k1_INLINE static void kaspa_secp256k1_fe_add(kaspa_secp256k1_fe *r, const kaspa_secp256k1_fe *a) {
 #ifdef VERIFY
-    secp256k1_fe_verify(a);
+    kaspa_secp256k1_fe_verify(a);
 #endif
     r->n[0] += a->n[0];
     r->n[1] += a->n[1];
@@ -414,41 +414,41 @@ SECP256K1_INLINE static void secp256k1_fe_add(secp256k1_fe *r, const secp256k1_f
 #ifdef VERIFY
     r->magnitude += a->magnitude;
     r->normalized = 0;
-    secp256k1_fe_verify(r);
+    kaspa_secp256k1_fe_verify(r);
 #endif
 }
 
-static void secp256k1_fe_mul(secp256k1_fe *r, const secp256k1_fe *a, const secp256k1_fe * SECP256K1_RESTRICT b) {
+static void kaspa_secp256k1_fe_mul(kaspa_secp256k1_fe *r, const kaspa_secp256k1_fe *a, const kaspa_secp256k1_fe * kaspa_secp256k1_RESTRICT b) {
 #ifdef VERIFY
     VERIFY_CHECK(a->magnitude <= 8);
     VERIFY_CHECK(b->magnitude <= 8);
-    secp256k1_fe_verify(a);
-    secp256k1_fe_verify(b);
+    kaspa_secp256k1_fe_verify(a);
+    kaspa_secp256k1_fe_verify(b);
     VERIFY_CHECK(r != b);
     VERIFY_CHECK(a != b);
 #endif
-    secp256k1_fe_mul_inner(r->n, a->n, b->n);
+    kaspa_secp256k1_fe_mul_inner(r->n, a->n, b->n);
 #ifdef VERIFY
     r->magnitude = 1;
     r->normalized = 0;
-    secp256k1_fe_verify(r);
+    kaspa_secp256k1_fe_verify(r);
 #endif
 }
 
-static void secp256k1_fe_sqr(secp256k1_fe *r, const secp256k1_fe *a) {
+static void kaspa_secp256k1_fe_sqr(kaspa_secp256k1_fe *r, const kaspa_secp256k1_fe *a) {
 #ifdef VERIFY
     VERIFY_CHECK(a->magnitude <= 8);
-    secp256k1_fe_verify(a);
+    kaspa_secp256k1_fe_verify(a);
 #endif
-    secp256k1_fe_sqr_inner(r->n, a->n);
+    kaspa_secp256k1_fe_sqr_inner(r->n, a->n);
 #ifdef VERIFY
     r->magnitude = 1;
     r->normalized = 0;
-    secp256k1_fe_verify(r);
+    kaspa_secp256k1_fe_verify(r);
 #endif
 }
 
-static SECP256K1_INLINE void secp256k1_fe_cmov(secp256k1_fe *r, const secp256k1_fe *a, int flag) {
+static kaspa_secp256k1_INLINE void kaspa_secp256k1_fe_cmov(kaspa_secp256k1_fe *r, const kaspa_secp256k1_fe *a, int flag) {
     uint64_t mask0, mask1;
     VG_CHECK_VERIFY(r->n, sizeof(r->n));
     mask0 = flag + ~((uint64_t)0);
@@ -466,7 +466,7 @@ static SECP256K1_INLINE void secp256k1_fe_cmov(secp256k1_fe *r, const secp256k1_
 #endif
 }
 
-static SECP256K1_INLINE void secp256k1_fe_storage_cmov(secp256k1_fe_storage *r, const secp256k1_fe_storage *a, int flag) {
+static kaspa_secp256k1_INLINE void kaspa_secp256k1_fe_storage_cmov(kaspa_secp256k1_fe_storage *r, const kaspa_secp256k1_fe_storage *a, int flag) {
     uint64_t mask0, mask1;
     VG_CHECK_VERIFY(r->n, sizeof(r->n));
     mask0 = flag + ~((uint64_t)0);
@@ -477,7 +477,7 @@ static SECP256K1_INLINE void secp256k1_fe_storage_cmov(secp256k1_fe_storage *r, 
     r->n[3] = (r->n[3] & mask0) | (a->n[3] & mask1);
 }
 
-static void secp256k1_fe_to_storage(secp256k1_fe_storage *r, const secp256k1_fe *a) {
+static void kaspa_secp256k1_fe_to_storage(kaspa_secp256k1_fe_storage *r, const kaspa_secp256k1_fe *a) {
 #ifdef VERIFY
     VERIFY_CHECK(a->normalized);
 #endif
@@ -487,7 +487,7 @@ static void secp256k1_fe_to_storage(secp256k1_fe_storage *r, const secp256k1_fe 
     r->n[3] = a->n[3] >> 36 | a->n[4] << 16;
 }
 
-static SECP256K1_INLINE void secp256k1_fe_from_storage(secp256k1_fe *r, const secp256k1_fe_storage *a) {
+static kaspa_secp256k1_INLINE void kaspa_secp256k1_fe_from_storage(kaspa_secp256k1_fe *r, const kaspa_secp256k1_fe_storage *a) {
     r->n[0] = a->n[0] & 0xFFFFFFFFFFFFFULL;
     r->n[1] = a->n[0] >> 52 | ((a->n[1] << 12) & 0xFFFFFFFFFFFFFULL);
     r->n[2] = a->n[1] >> 40 | ((a->n[2] << 24) & 0xFFFFFFFFFFFFFULL);
@@ -499,11 +499,11 @@ static SECP256K1_INLINE void secp256k1_fe_from_storage(secp256k1_fe *r, const se
 #endif
 }
 
-static void secp256k1_fe_from_signed62(secp256k1_fe *r, const secp256k1_modinv64_signed62 *a) {
+static void kaspa_secp256k1_fe_from_signed62(kaspa_secp256k1_fe *r, const kaspa_secp256k1_modinv64_signed62 *a) {
     const uint64_t M52 = UINT64_MAX >> 12;
     const uint64_t a0 = a->v[0], a1 = a->v[1], a2 = a->v[2], a3 = a->v[3], a4 = a->v[4];
 
-    /* The output from secp256k1_modinv64{_var} should be normalized to range [0,modulus), and
+    /* The output from kaspa_secp256k1_modinv64{_var} should be normalized to range [0,modulus), and
      * have limbs in [0,2^62). The modulus is < 2^256, so the top limb must be below 2^(256-62*4).
      */
     VERIFY_CHECK(a0 >> 62 == 0);
@@ -521,11 +521,11 @@ static void secp256k1_fe_from_signed62(secp256k1_fe *r, const secp256k1_modinv64
 #ifdef VERIFY
     r->magnitude = 1;
     r->normalized = 1;
-    secp256k1_fe_verify(r);
+    kaspa_secp256k1_fe_verify(r);
 #endif
 }
 
-static void secp256k1_fe_to_signed62(secp256k1_modinv64_signed62 *r, const secp256k1_fe *a) {
+static void kaspa_secp256k1_fe_to_signed62(kaspa_secp256k1_modinv64_signed62 *r, const kaspa_secp256k1_fe *a) {
     const uint64_t M62 = UINT64_MAX >> 2;
     const uint64_t a0 = a->n[0], a1 = a->n[1], a2 = a->n[2], a3 = a->n[3], a4 = a->n[4];
 
@@ -540,39 +540,39 @@ static void secp256k1_fe_to_signed62(secp256k1_modinv64_signed62 *r, const secp2
     r->v[4] =  a4 >> 40;
 }
 
-static const secp256k1_modinv64_modinfo secp256k1_const_modinfo_fe = {
+static const kaspa_secp256k1_modinv64_modinfo kaspa_secp256k1_const_modinfo_fe = {
     {{-0x1000003D1LL, 0, 0, 0, 256}},
     0x27C7F6E22DDACACFLL
 };
 
-static void secp256k1_fe_inv(secp256k1_fe *r, const secp256k1_fe *x) {
-    secp256k1_fe tmp;
-    secp256k1_modinv64_signed62 s;
+static void kaspa_secp256k1_fe_inv(kaspa_secp256k1_fe *r, const kaspa_secp256k1_fe *x) {
+    kaspa_secp256k1_fe tmp;
+    kaspa_secp256k1_modinv64_signed62 s;
 
     tmp = *x;
-    secp256k1_fe_normalize(&tmp);
-    secp256k1_fe_to_signed62(&s, &tmp);
-    secp256k1_modinv64(&s, &secp256k1_const_modinfo_fe);
-    secp256k1_fe_from_signed62(r, &s);
+    kaspa_secp256k1_fe_normalize(&tmp);
+    kaspa_secp256k1_fe_to_signed62(&s, &tmp);
+    kaspa_secp256k1_modinv64(&s, &kaspa_secp256k1_const_modinfo_fe);
+    kaspa_secp256k1_fe_from_signed62(r, &s);
 
 #ifdef VERIFY
-    VERIFY_CHECK(secp256k1_fe_normalizes_to_zero(r) == secp256k1_fe_normalizes_to_zero(&tmp));
+    VERIFY_CHECK(kaspa_secp256k1_fe_normalizes_to_zero(r) == kaspa_secp256k1_fe_normalizes_to_zero(&tmp));
 #endif
 }
 
-static void secp256k1_fe_inv_var(secp256k1_fe *r, const secp256k1_fe *x) {
-    secp256k1_fe tmp;
-    secp256k1_modinv64_signed62 s;
+static void kaspa_secp256k1_fe_inv_var(kaspa_secp256k1_fe *r, const kaspa_secp256k1_fe *x) {
+    kaspa_secp256k1_fe tmp;
+    kaspa_secp256k1_modinv64_signed62 s;
 
     tmp = *x;
-    secp256k1_fe_normalize_var(&tmp);
-    secp256k1_fe_to_signed62(&s, &tmp);
-    secp256k1_modinv64_var(&s, &secp256k1_const_modinfo_fe);
-    secp256k1_fe_from_signed62(r, &s);
+    kaspa_secp256k1_fe_normalize_var(&tmp);
+    kaspa_secp256k1_fe_to_signed62(&s, &tmp);
+    kaspa_secp256k1_modinv64_var(&s, &kaspa_secp256k1_const_modinfo_fe);
+    kaspa_secp256k1_fe_from_signed62(r, &s);
 
 #ifdef VERIFY
-    VERIFY_CHECK(secp256k1_fe_normalizes_to_zero(r) == secp256k1_fe_normalizes_to_zero(&tmp));
+    VERIFY_CHECK(kaspa_secp256k1_fe_normalizes_to_zero(r) == kaspa_secp256k1_fe_normalizes_to_zero(&tmp));
 #endif
 }
 
-#endif /* SECP256K1_FIELD_REPR_IMPL_H */
+#endif /* kaspa_secp256k1_FIELD_REPR_IMPL_H */

@@ -3,7 +3,7 @@ package secp256k1
 // // **This is CGO's build system. CGO parses the following comments as build instructions.**
 // // Including the headers and code, and defining the default macros
 // #cgo CFLAGS: -I./depend/secp256k1 -I./depend/secp256k1/src/
-// #cgo CFLAGS: -DSECP256K1_BUILD=1 -DECMULT_WINDOW_SIZE=15 -DENABLE_MODULE_SCHNORRSIG=1 -DENABLE_MODULE_EXTRAKEYS=1
+// #cgo CFLAGS: -Dkaspa_secp256k1_BUILD=1 -DECMULT_WINDOW_SIZE=15 -DENABLE_MODULE_SCHNORRSIG=1 -DENABLE_MODULE_EXTRAKEYS=1
 // #cgo CFLAGS: -DECMULT_GEN_PREC_BITS=4
 // // x86_64 can use the Assembly implementation.
 // #cgo amd64 CFLAGS: -DUSE_ASM_X86_64=1
@@ -20,19 +20,19 @@ import (
 
 // A global context for using secp256k1. this is generated once and used to speed computation
 // and aid resisting side channel attacks.
-var context *C.secp256k1_context
+var context *C.kaspa_secp256k1_context
 
 // Initialize the context for both signing and verifying.
 // and randomize it to help resist side channel attacks.
 func init() {
-	context = C.secp256k1_context_create(C.SECP256K1_CONTEXT_SIGN | C.SECP256K1_CONTEXT_VERIFY)
+	context = C.kaspa_secp256k1_context_create(C.kaspa_secp256k1_CONTEXT_SIGN | C.kaspa_secp256k1_CONTEXT_VERIFY)
 	seed := [32]byte{}
 	n, err := rand.Read(seed[:])
 	if err != nil || n != len(seed) {
 		panic("Failed getting random values on initializing")
 	}
 	cPtr := (*C.uchar)(&seed[0])
-	ret := C.secp256k1_context_randomize(context, cPtr)
+	ret := C.kaspa_secp256k1_context_randomize(context, cPtr)
 	if ret != 1 {
 		panic("Failed randomizing the context. Should never happen")
 	}

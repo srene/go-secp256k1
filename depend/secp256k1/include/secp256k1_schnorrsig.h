@@ -1,5 +1,5 @@
-#ifndef SECP256K1_SCHNORRSIG_H
-#define SECP256K1_SCHNORRSIG_H
+#ifndef kaspa_secp256k1_SCHNORRSIG_H
+#define kaspa_secp256k1_SCHNORRSIG_H
 
 #include "secp256k1.h"
 #include "secp256k1_extrakeys.h"
@@ -15,7 +15,7 @@ extern "C" {
 
 /** A pointer to a function to deterministically generate a nonce.
  *
- *  Same as secp256k1_nonce function with the exception of accepting an
+ *  Same as kaspa_secp256k1_nonce function with the exception of accepting an
  *  additional pubkey argument and not requiring an attempt argument. The pubkey
  *  argument can protect signature schemes with key-prefixed challenge hash
  *  inputs against reusing the nonce when signing with the wrong precomputed
@@ -35,7 +35,7 @@ extern "C" {
  *  Except for test cases, this function should compute some cryptographic hash of
  *  the message, the key, the pubkey, the algorithm description, and data.
  */
-typedef int (*secp256k1_nonce_function_hardened)(
+typedef int (*kaspa_secp256k1_nonce_function_hardened)(
     unsigned char *nonce32,
     const unsigned char *msg32,
     const unsigned char *key32,
@@ -56,16 +56,16 @@ typedef int (*secp256k1_nonce_function_hardened)(
  *  bytes. Therefore, to create BIP-340 compliant signatures, algo16 must be set
  *  to "BIP0340/nonce\0\0\0"
  */
-SECP256K1_API extern const secp256k1_nonce_function_hardened secp256k1_nonce_function_bip340;
+kaspa_secp256k1_API extern const kaspa_secp256k1_nonce_function_hardened kaspa_secp256k1_nonce_function_bip340;
 
 /** Create a Schnorr signature.
  *
  *  Does _not_ strictly follow BIP-340 because it does not verify the resulting
- *  signature. Instead, you can manually use secp256k1_schnorrsig_verify and
+ *  signature. Instead, you can manually use kaspa_secp256k1_schnorrsig_verify and
  *  abort if it fails.
  *
  *  Otherwise BIP-340 compliant if the noncefp argument is NULL or
- *  secp256k1_nonce_function_bip340 and the ndata argument is 32-byte auxiliary
+ *  kaspa_secp256k1_nonce_function_bip340 and the ndata argument is 32-byte auxiliary
  *  randomness.
  *
  *  Returns 1 on success, 0 on failure.
@@ -73,20 +73,20 @@ SECP256K1_API extern const secp256k1_nonce_function_hardened secp256k1_nonce_fun
  *  Out:   sig64: pointer to a 64-byte array to store the serialized signature (cannot be NULL)
  *  In:    msg32: the 32-byte message being signed (cannot be NULL)
  *       keypair: pointer to an initialized keypair (cannot be NULL)
- *       noncefp: pointer to a nonce generation function. If NULL, secp256k1_nonce_function_bip340 is used
+ *       noncefp: pointer to a nonce generation function. If NULL, kaspa_secp256k1_nonce_function_bip340 is used
  *         ndata: pointer to arbitrary data used by the nonce generation
  *                function (can be NULL). If it is non-NULL and
- *                secp256k1_nonce_function_bip340 is used, then ndata must be a
+ *                kaspa_secp256k1_nonce_function_bip340 is used, then ndata must be a
  *                pointer to 32-byte auxiliary randomness as per BIP-340.
  */
-SECP256K1_API int secp256k1_schnorrsig_sign(
-    const secp256k1_context* ctx,
+kaspa_secp256k1_API int kaspa_secp256k1_schnorrsig_sign(
+    const kaspa_secp256k1_context* ctx,
     unsigned char *sig64,
     const unsigned char *msg32,
-    const secp256k1_keypair *keypair,
-    secp256k1_nonce_function_hardened noncefp,
+    const kaspa_secp256k1_keypair *keypair,
+    kaspa_secp256k1_nonce_function_hardened noncefp,
     void *ndata
-) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);
+) kaspa_secp256k1_ARG_NONNULL(1) kaspa_secp256k1_ARG_NONNULL(2) kaspa_secp256k1_ARG_NONNULL(3) kaspa_secp256k1_ARG_NONNULL(4);
 
 /** Verify a Schnorr signature.
  *
@@ -97,15 +97,15 @@ SECP256K1_API int secp256k1_schnorrsig_sign(
  *         msg32: the 32-byte message being verified (cannot be NULL)
  *        pubkey: pointer to an x-only public key to verify with (cannot be NULL)
  */
-SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_schnorrsig_verify(
-    const secp256k1_context* ctx,
+kaspa_secp256k1_API kaspa_secp256k1_WARN_UNUSED_RESULT int kaspa_secp256k1_schnorrsig_verify(
+    const kaspa_secp256k1_context* ctx,
     const unsigned char *sig64,
     const unsigned char *msg32,
-    const secp256k1_xonly_pubkey *pubkey
-) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);
+    const kaspa_secp256k1_xonly_pubkey *pubkey
+) kaspa_secp256k1_ARG_NONNULL(1) kaspa_secp256k1_ARG_NONNULL(2) kaspa_secp256k1_ARG_NONNULL(3) kaspa_secp256k1_ARG_NONNULL(4);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* SECP256K1_SCHNORRSIG_H */
+#endif /* kaspa_secp256k1_SCHNORRSIG_H */

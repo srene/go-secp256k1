@@ -6,6 +6,7 @@ import "C"
 import (
 	"encoding/hex"
 	"fmt"
+
 	"github.com/pkg/errors"
 )
 
@@ -15,7 +16,7 @@ const SerializedSchnorrPublicKeySize = 32
 // SchnorrPublicKey is a PublicKey type used to sign and verify Schnorr signatures.
 // The struct itself is an opaque data type that should only be created via the supplied methods.
 type SchnorrPublicKey struct {
-	pubkey C.secp256k1_xonly_pubkey
+	pubkey C.kaspa_secp256k1_xonly_pubkey
 	init   bool
 }
 
@@ -67,7 +68,7 @@ func (key SchnorrPublicKey) String() string {
 func (key *SchnorrPublicKey) SchnorrVerify(hash *Hash, signature *SchnorrSignature) bool {
 	cPtrHash := (*C.uchar)(&hash[0])
 	cPtrSig := (*C.uchar)(&signature.signature[0])
-	return C.secp256k1_schnorrsig_verify(context, cPtrSig, cPtrHash, &key.pubkey) == 1
+	return C.kaspa_secp256k1_schnorrsig_verify(context, cPtrSig, cPtrHash, &key.pubkey) == 1
 }
 
 // DeserializeSchnorrPubKey deserializes a serialized schnorr public key, verifying it's valid.
@@ -77,7 +78,7 @@ func DeserializeSchnorrPubKey(serializedPubKey []byte) (*SchnorrPublicKey, error
 	}
 	key := SchnorrPublicKey{init: true}
 	cPtr := (*C.uchar)(&serializedPubKey[0])
-	ret := C.secp256k1_xonly_pubkey_parse(C.secp256k1_context_no_precomp, &key.pubkey, cPtr)
+	ret := C.kaspa_secp256k1_xonly_pubkey_parse(C.kaspa_secp256k1_context_no_precomp, &key.pubkey, cPtr)
 	if ret != 1 {
 		return nil, errors.New("failed parsing the public key")
 	}
@@ -91,7 +92,7 @@ func (key *SchnorrPublicKey) Serialize() (*SerializedSchnorrPublicKey, error) {
 	}
 	serialized := SerializedSchnorrPublicKey{}
 	cPtr := (*C.uchar)(&serialized[0])
-	ret := C.secp256k1_xonly_pubkey_serialize(C.secp256k1_context_no_precomp, cPtr, &key.pubkey)
+	ret := C.kaspa_secp256k1_xonly_pubkey_serialize(C.kaspa_secp256k1_context_no_precomp, cPtr, &key.pubkey)
 	if ret != 1 {
 		panic("failed serializing a pubkey. Should never happen (upstream promise to return 1)")
 	}
@@ -110,13 +111,13 @@ func (key *SchnorrPublicKey) addInternal(tweak [32]byte) (bool, error) {
 		return false, errors.WithStack(errNonInitializedKey)
 	}
 	cPtrTweak := (*C.uchar)(&tweak[0])
-	fullKey := C.secp256k1_pubkey{}
-	ret := C.secp256k1_xonly_pubkey_tweak_add(context, &fullKey, &key.pubkey, cPtrTweak)
+	fullKey := C.kaspa_secp256k1_pubkey{}
+	ret := C.kaspa_secp256k1_xonly_pubkey_tweak_add(context, &fullKey, &key.pubkey, cPtrTweak)
 	if ret != 1 {
 		return false, errors.New("failed adding to the public key. Tweak is bigger than the order or the complement of the private key")
 	}
 	var cParity C.int
-	ret = C.secp256k1_xonly_pubkey_from_pubkey(context, &key.pubkey, &cParity, &fullKey)
+	ret = C.kaspa_secp256k1_xonly_pubkey_from_pubkey(context, &key.pubkey, &cParity, &fullKey)
 	if ret != 1 {
 		panic("Should never fail. we just created the public key so it can't be invalid")
 	}

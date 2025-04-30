@@ -6,6 +6,7 @@ import "C"
 import (
 	"encoding/hex"
 	"fmt"
+
 	"github.com/pkg/errors"
 )
 
@@ -15,7 +16,7 @@ const SerializedECDSAPublicKeySize = 33
 // ECDSAPublicKey is a PublicKey type used to sign and verify ECDSA signatures.
 // The struct itself is an opaque data type that should only be created via the supplied methods.
 type ECDSAPublicKey struct {
-	pubkey C.secp256k1_pubkey
+	pubkey C.kaspa_secp256k1_pubkey
 	init   bool
 }
 
@@ -66,7 +67,7 @@ func (key ECDSAPublicKey) String() string {
 // Notice: the [32] byte array *MUST* be a hash of a message you hashed yourself.
 func (key *ECDSAPublicKey) ECDSAVerify(hash *Hash, signature *ECDSASignature) bool {
 	cPtrHash := (*C.uchar)(&hash[0])
-	return C.secp256k1_ecdsa_verify(context, &signature.signature, cPtrHash, &key.pubkey) == 1
+	return C.kaspa_secp256k1_ecdsa_verify(context, &signature.signature, cPtrHash, &key.pubkey) == 1
 }
 
 // DeserializeECDSAPubKey deserializes a serialized ECDSA public key, verifying it's valid.
@@ -78,7 +79,7 @@ func DeserializeECDSAPubKey(serializedPubKey []byte) (*ECDSAPublicKey, error) {
 	}
 	key := ECDSAPublicKey{init: true}
 	cPtr := (*C.uchar)(&serializedPubKey[0])
-	ret := C.secp256k1_ec_pubkey_parse(context, &key.pubkey, cPtr, SerializedECDSAPublicKeySize)
+	ret := C.kaspa_secp256k1_ec_pubkey_parse(context, &key.pubkey, cPtr, SerializedECDSAPublicKeySize)
 	if ret != 1 {
 		return nil, errors.New("failed parsing the public key")
 	}
@@ -94,12 +95,12 @@ func (key *ECDSAPublicKey) Serialize() (*SerializedECDSAPublicKey, error) {
 	cPtr := (*C.uchar)(&serialized[0])
 	cLen := C.size_t(SerializedECDSAPublicKeySize)
 
-	ret := C.secp256k1_ec_pubkey_serialize(context, cPtr, &cLen, &key.pubkey, C.SECP256K1_EC_COMPRESSED)
+	ret := C.kaspa_secp256k1_ec_pubkey_serialize(context, cPtr, &cLen, &key.pubkey, C.kaspa_secp256k1_EC_COMPRESSED)
 	if ret != 1 {
 		panic("failed serializing a pubkey. Should never happen (upstream promise to return 1)")
 	}
 	if cLen != SerializedECDSAPublicKeySize {
-		panic("Returned length should be 33 because we passed SECP256K1_EC_COMPRESSED")
+		panic("Returned length should be 33 because we passed kaspa_secp256k1_EC_COMPRESSED")
 	}
 	return &serialized, nil
 }
@@ -111,7 +112,7 @@ func (key *ECDSAPublicKey) Add(tweak [32]byte) error {
 		return errors.WithStack(errNonInitializedKey)
 	}
 	cPtrTweak := (*C.uchar)(&tweak[0])
-	ret := C.secp256k1_ec_pubkey_tweak_add(context, &key.pubkey, cPtrTweak)
+	ret := C.kaspa_secp256k1_ec_pubkey_tweak_add(context, &key.pubkey, cPtrTweak)
 	if ret != 1 {
 		return errors.New("failed adding to the public key. Tweak is bigger than the order or the complement of the private key")
 	}
@@ -124,7 +125,7 @@ func (key *ECDSAPublicKey) Negate() error {
 	if !key.init {
 		return errors.WithStack(errNonInitializedKey)
 	}
-	ret := C.secp256k1_ec_pubkey_negate(C.secp256k1_context_no_precomp, &key.pubkey)
+	ret := C.kaspa_secp256k1_ec_pubkey_negate(C.kaspa_secp256k1_context_no_precomp, &key.pubkey)
 	if ret != 1 {
 		panic("failed Negating the public key. Should never happen")
 	}
@@ -139,7 +140,7 @@ func (key *ECDSAPublicKey) ToSchnorr() (*SchnorrPublicKey, error) {
 		return nil, errors.WithStack(errNonInitializedKey)
 	}
 	schnorrPubKey := SchnorrPublicKey{init: true}
-	ret := C.secp256k1_xonly_pubkey_from_pubkey(C.secp256k1_context_no_precomp, &schnorrPubKey.pubkey, nil, &key.pubkey)
+	ret := C.kaspa_secp256k1_xonly_pubkey_from_pubkey(C.kaspa_secp256k1_context_no_precomp, &schnorrPubKey.pubkey, nil, &key.pubkey)
 	if ret != 1 {
 		panic("failed converting an ECDSA key to a schnorr key. Should never happen")
 	}

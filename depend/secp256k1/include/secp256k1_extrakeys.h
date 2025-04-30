@@ -1,5 +1,5 @@
-#ifndef SECP256K1_EXTRAKEYS_H
-#define SECP256K1_EXTRAKEYS_H
+#ifndef kaspa_secp256k1_EXTRAKEYS_H
+#define kaspa_secp256k1_EXTRAKEYS_H
 
 #include "secp256k1.h"
 
@@ -16,12 +16,12 @@ extern "C" {
  *  guaranteed to be portable between different platforms or versions. It is
  *  however guaranteed to be 64 bytes in size, and can be safely copied/moved.
  *  If you need to convert to a format suitable for storage, transmission, or
- *  comparison, use secp256k1_xonly_pubkey_serialize and
- *  secp256k1_xonly_pubkey_parse.
+ *  comparison, use kaspa_secp256k1_xonly_pubkey_serialize and
+ *  kaspa_secp256k1_xonly_pubkey_parse.
  */
 typedef struct {
     unsigned char data[64];
-} secp256k1_xonly_pubkey;
+} kaspa_secp256k1_xonly_pubkey;
 
 /** Opaque data structure that holds a keypair consisting of a secret and a
  *  public key.
@@ -32,7 +32,7 @@ typedef struct {
  */
 typedef struct {
     unsigned char data[96];
-} secp256k1_keypair;
+} kaspa_secp256k1_keypair;
 
 /** Parse a 32-byte sequence into a xonly_pubkey object.
  *
@@ -45,11 +45,11 @@ typedef struct {
  *               (cannot be NULL).
  *  In: input32: pointer to a serialized xonly_pubkey (cannot be NULL)
  */
-SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_xonly_pubkey_parse(
-    const secp256k1_context* ctx,
-    secp256k1_xonly_pubkey* pubkey,
+kaspa_secp256k1_API kaspa_secp256k1_WARN_UNUSED_RESULT int kaspa_secp256k1_xonly_pubkey_parse(
+    const kaspa_secp256k1_context* ctx,
+    kaspa_secp256k1_xonly_pubkey* pubkey,
     const unsigned char *input32
-) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3);
+) kaspa_secp256k1_ARG_NONNULL(1) kaspa_secp256k1_ARG_NONNULL(2) kaspa_secp256k1_ARG_NONNULL(3);
 
 /** Serialize an xonly_pubkey object into a 32-byte sequence.
  *
@@ -58,16 +58,16 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_xonly_pubkey_parse(
  *  Args:     ctx: a secp256k1 context object (cannot be NULL).
  *  Out: output32: a pointer to a 32-byte array to place the serialized key in
  *                 (cannot be NULL).
- *  In:    pubkey: a pointer to a secp256k1_xonly_pubkey containing an
+ *  In:    pubkey: a pointer to a kaspa_secp256k1_xonly_pubkey containing an
  *                 initialized public key (cannot be NULL).
  */
-SECP256K1_API int secp256k1_xonly_pubkey_serialize(
-    const secp256k1_context* ctx,
+kaspa_secp256k1_API int kaspa_secp256k1_xonly_pubkey_serialize(
+    const kaspa_secp256k1_context* ctx,
     unsigned char *output32,
-    const secp256k1_xonly_pubkey* pubkey
-) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3);
+    const kaspa_secp256k1_xonly_pubkey* pubkey
+) kaspa_secp256k1_ARG_NONNULL(1) kaspa_secp256k1_ARG_NONNULL(2) kaspa_secp256k1_ARG_NONNULL(3);
 
-/** Converts a secp256k1_pubkey into a secp256k1_xonly_pubkey.
+/** Converts a kaspa_secp256k1_pubkey into a kaspa_secp256k1_xonly_pubkey.
  *
  *  Returns: 1 if the public key was successfully converted
  *           0 otherwise
@@ -80,19 +80,19 @@ SECP256K1_API int secp256k1_xonly_pubkey_serialize(
  *                     set to 0 otherwise. (can be NULL)
  *  In:        pubkey: pointer to a public key that is converted (cannot be NULL)
  */
-SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_xonly_pubkey_from_pubkey(
-    const secp256k1_context* ctx,
-    secp256k1_xonly_pubkey *xonly_pubkey,
+kaspa_secp256k1_API kaspa_secp256k1_WARN_UNUSED_RESULT int kaspa_secp256k1_xonly_pubkey_from_pubkey(
+    const kaspa_secp256k1_context* ctx,
+    kaspa_secp256k1_xonly_pubkey *xonly_pubkey,
     int *pk_parity,
-    const secp256k1_pubkey *pubkey
-) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(4);
+    const kaspa_secp256k1_pubkey *pubkey
+) kaspa_secp256k1_ARG_NONNULL(1) kaspa_secp256k1_ARG_NONNULL(2) kaspa_secp256k1_ARG_NONNULL(4);
 
 /** Tweak an x-only public key by adding the generator multiplied with tweak32
  *  to it.
  *
  *  Note that the resulting point can not in general be represented by an x-only
  *  pubkey because it may have an odd Y coordinate. Instead, the output_pubkey
- *  is a normal secp256k1_pubkey.
+ *  is a normal kaspa_secp256k1_pubkey.
  *
  *  Returns: 0 if the arguments are invalid or the resulting public key would be
  *           invalid (only when the tweak is the negation of the corresponding
@@ -106,24 +106,24 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_xonly_pubkey_from_pubke
  *  In: internal_pubkey: pointer to an x-only pubkey to apply the tweak to.
  *                       (cannot be NULL).
  *              tweak32: pointer to a 32-byte tweak. If the tweak is invalid
- *                       according to secp256k1_ec_seckey_verify, this function
+ *                       according to kaspa_secp256k1_ec_seckey_verify, this function
  *                       returns 0. For uniformly random 32-byte arrays the
  *                       chance of being invalid is negligible (around 1 in
  *                       2^128) (cannot be NULL).
  */
-SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_xonly_pubkey_tweak_add(
-    const secp256k1_context* ctx,
-    secp256k1_pubkey *output_pubkey,
-    const secp256k1_xonly_pubkey *internal_pubkey,
+kaspa_secp256k1_API kaspa_secp256k1_WARN_UNUSED_RESULT int kaspa_secp256k1_xonly_pubkey_tweak_add(
+    const kaspa_secp256k1_context* ctx,
+    kaspa_secp256k1_pubkey *output_pubkey,
+    const kaspa_secp256k1_xonly_pubkey *internal_pubkey,
     const unsigned char *tweak32
-) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3) SECP256K1_ARG_NONNULL(4);
+) kaspa_secp256k1_ARG_NONNULL(1) kaspa_secp256k1_ARG_NONNULL(2) kaspa_secp256k1_ARG_NONNULL(3) kaspa_secp256k1_ARG_NONNULL(4);
 
 /** Checks that a tweaked pubkey is the result of calling
- *  secp256k1_xonly_pubkey_tweak_add with internal_pubkey and tweak32.
+ *  kaspa_secp256k1_xonly_pubkey_tweak_add with internal_pubkey and tweak32.
  *
  *  The tweaked pubkey is represented by its 32-byte x-only serialization and
  *  its pk_parity, which can both be obtained by converting the result of
- *  tweak_add to a secp256k1_xonly_pubkey.
+ *  tweak_add to a kaspa_secp256k1_xonly_pubkey.
  *
  *  Note that this alone does _not_ verify that the tweaked pubkey is a
  *  commitment. If the tweak is not chosen in a specific way, the tweaked pubkey
@@ -137,19 +137,19 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_xonly_pubkey_tweak_add(
  *     tweaked_pk_parity: the parity of the tweaked pubkey (whose serialization
  *                        is passed in as tweaked_pubkey32). This must match the
  *                        pk_parity value that is returned when calling
- *                        secp256k1_xonly_pubkey with the tweaked pubkey, or
+ *                        kaspa_secp256k1_xonly_pubkey with the tweaked pubkey, or
  *                        this function will fail.
  *       internal_pubkey: pointer to an x-only public key object to apply the
  *                        tweak to (cannot be NULL)
  *               tweak32: pointer to a 32-byte tweak (cannot be NULL)
  */
-SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_xonly_pubkey_tweak_add_check(
-    const secp256k1_context* ctx,
+kaspa_secp256k1_API kaspa_secp256k1_WARN_UNUSED_RESULT int kaspa_secp256k1_xonly_pubkey_tweak_add_check(
+    const kaspa_secp256k1_context* ctx,
     const unsigned char *tweaked_pubkey32,
     int tweaked_pk_parity,
-    const secp256k1_xonly_pubkey *internal_pubkey,
+    const kaspa_secp256k1_xonly_pubkey *internal_pubkey,
     const unsigned char *tweak32
-) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(4) SECP256K1_ARG_NONNULL(5);
+) kaspa_secp256k1_ARG_NONNULL(1) kaspa_secp256k1_ARG_NONNULL(2) kaspa_secp256k1_ARG_NONNULL(4) kaspa_secp256k1_ARG_NONNULL(5);
 
 /** Compute the keypair for a secret key.
  *
@@ -159,11 +159,11 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_xonly_pubkey_tweak_add_
  *  Out: keypair: pointer to the created keypair (cannot be NULL)
  *  In:   seckey: pointer to a 32-byte secret key (cannot be NULL)
  */
-SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_keypair_create(
-    const secp256k1_context* ctx,
-    secp256k1_keypair *keypair,
+kaspa_secp256k1_API kaspa_secp256k1_WARN_UNUSED_RESULT int kaspa_secp256k1_keypair_create(
+    const kaspa_secp256k1_context* ctx,
+    kaspa_secp256k1_keypair *keypair,
     const unsigned char *seckey
-) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3);
+) kaspa_secp256k1_ARG_NONNULL(1) kaspa_secp256k1_ARG_NONNULL(2) kaspa_secp256k1_ARG_NONNULL(3);
 
 /** Get the secret key from a keypair.
  *
@@ -172,11 +172,11 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_keypair_create(
  *  Out: seckey: pointer to a 32-byte buffer for the secret key (cannot be NULL)
  *  In: keypair: pointer to a keypair (cannot be NULL)
  */
-SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_keypair_sec(
-    const secp256k1_context* ctx,
+kaspa_secp256k1_API kaspa_secp256k1_WARN_UNUSED_RESULT int kaspa_secp256k1_keypair_sec(
+    const kaspa_secp256k1_context* ctx,
     unsigned char *seckey,
-    const secp256k1_keypair *keypair
-) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3);
+    const kaspa_secp256k1_keypair *keypair
+) kaspa_secp256k1_ARG_NONNULL(1) kaspa_secp256k1_ARG_NONNULL(2) kaspa_secp256k1_ARG_NONNULL(3);
 
 /** Get the public key from a keypair.
  *
@@ -187,16 +187,16 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_keypair_sec(
  *               (cannot be NULL)
  *  In: keypair: pointer to a keypair (cannot be NULL)
  */
-SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_keypair_pub(
-    const secp256k1_context* ctx,
-    secp256k1_pubkey *pubkey,
-    const secp256k1_keypair *keypair
-) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3);
+kaspa_secp256k1_API kaspa_secp256k1_WARN_UNUSED_RESULT int kaspa_secp256k1_keypair_pub(
+    const kaspa_secp256k1_context* ctx,
+    kaspa_secp256k1_pubkey *pubkey,
+    const kaspa_secp256k1_keypair *keypair
+) kaspa_secp256k1_ARG_NONNULL(1) kaspa_secp256k1_ARG_NONNULL(2) kaspa_secp256k1_ARG_NONNULL(3);
 
 /** Get the x-only public key from a keypair.
  *
- *  This is the same as calling secp256k1_keypair_pub and then
- *  secp256k1_xonly_pubkey_from_pubkey.
+ *  This is the same as calling kaspa_secp256k1_keypair_pub and then
+ *  kaspa_secp256k1_xonly_pubkey_from_pubkey.
  *
  *  Returns: 0 if the arguments are invalid. 1 otherwise.
  *  Args:   ctx: pointer to a context object (cannot be NULL)
@@ -205,22 +205,22 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_keypair_pub(
  *               xonly_pubkey. If not, it's set to an invalid value (cannot be
  *               NULL).
  *    pk_parity: pointer to an integer that will be set to the pk_parity
- *               argument of secp256k1_xonly_pubkey_from_pubkey (can be NULL).
+ *               argument of kaspa_secp256k1_xonly_pubkey_from_pubkey (can be NULL).
  *  In: keypair: pointer to a keypair (cannot be NULL)
  */
-SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_keypair_xonly_pub(
-    const secp256k1_context* ctx,
-    secp256k1_xonly_pubkey *pubkey,
+kaspa_secp256k1_API kaspa_secp256k1_WARN_UNUSED_RESULT int kaspa_secp256k1_keypair_xonly_pub(
+    const kaspa_secp256k1_context* ctx,
+    kaspa_secp256k1_xonly_pubkey *pubkey,
     int *pk_parity,
-    const secp256k1_keypair *keypair
-) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(4);
+    const kaspa_secp256k1_keypair *keypair
+) kaspa_secp256k1_ARG_NONNULL(1) kaspa_secp256k1_ARG_NONNULL(2) kaspa_secp256k1_ARG_NONNULL(4);
 
 /** Tweak a keypair by adding tweak32 to the secret key and updating the public
  *  key accordingly.
  *
- *  Calling this function and then secp256k1_keypair_pub results in the same
- *  public key as calling secp256k1_keypair_xonly_pub and then
- *  secp256k1_xonly_pubkey_tweak_add.
+ *  Calling this function and then kaspa_secp256k1_keypair_pub results in the same
+ *  public key as calling kaspa_secp256k1_keypair_xonly_pub and then
+ *  kaspa_secp256k1_xonly_pubkey_tweak_add.
  *
  *  Returns: 0 if the arguments are invalid or the resulting keypair would be
  *           invalid (only when the tweak is the negation of the keypair's
@@ -232,18 +232,18 @@ SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_keypair_xonly_pub(
  *                   an invalid value if this function returns 0 (cannot be
  *                   NULL).
  *  In:     tweak32: pointer to a 32-byte tweak. If the tweak is invalid according
- *                   to secp256k1_ec_seckey_verify, this function returns 0. For
+ *                   to kaspa_secp256k1_ec_seckey_verify, this function returns 0. For
  *                   uniformly random 32-byte arrays the chance of being invalid
  *                   is negligible (around 1 in 2^128) (cannot be NULL).
  */
-SECP256K1_API SECP256K1_WARN_UNUSED_RESULT int secp256k1_keypair_xonly_tweak_add(
-    const secp256k1_context* ctx,
-    secp256k1_keypair *keypair,
+kaspa_secp256k1_API kaspa_secp256k1_WARN_UNUSED_RESULT int kaspa_secp256k1_keypair_xonly_tweak_add(
+    const kaspa_secp256k1_context* ctx,
+    kaspa_secp256k1_keypair *keypair,
     const unsigned char *tweak32
-) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3);
+) kaspa_secp256k1_ARG_NONNULL(1) kaspa_secp256k1_ARG_NONNULL(2) kaspa_secp256k1_ARG_NONNULL(3);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* SECP256K1_EXTRAKEYS_H */
+#endif /* kaspa_secp256k1_EXTRAKEYS_H */

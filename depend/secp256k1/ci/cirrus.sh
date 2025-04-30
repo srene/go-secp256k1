@@ -60,7 +60,7 @@ then
         EXEC="$EXEC valgrind --error-exitcode=42"
     fi
     # This limits the iterations in the benchmarks below to ITER iterations.
-    export SECP256K1_BENCH_ITERS="$ITERS"
+    export kaspa_secp256k1_BENCH_ITERS="$ITERS"
     {
         $EXEC ./bench_ecmult
         $EXEC ./bench_internal

@@ -4,10 +4,10 @@
  * file COPYING or https://www.opensource.org/licenses/mit-license.php.*
  ***********************************************************************/
 
-#ifndef SECP256K1_MODULE_SCHNORRSIG_TESTS_H
-#define SECP256K1_MODULE_SCHNORRSIG_TESTS_H
+#ifndef kaspa_secp256k1_MODULE_SCHNORRSIG_TESTS_H
+#define kaspa_secp256k1_MODULE_SCHNORRSIG_TESTS_H
 
-#include "secp256k1_schnorrsig.h"
+#include "kaspa_secp256k1_schnorrsig.h"
 
 /* Checks that a bit flip in the n_flip-th argument (that has n_bytes many
  * bytes) changes the hash function
@@ -15,28 +15,28 @@
 void nonce_function_bip340_bitflip(unsigned char **args, size_t n_flip, size_t n_bytes) {
     unsigned char nonces[2][32];
     CHECK(nonce_function_bip340(nonces[0], args[0], args[1], args[2], args[3], args[4]) == 1);
-    secp256k1_testrand_flip(args[n_flip], n_bytes);
+    kaspa_secp256k1_testrand_flip(args[n_flip], n_bytes);
     CHECK(nonce_function_bip340(nonces[1], args[0], args[1], args[2], args[3], args[4]) == 1);
-    CHECK(secp256k1_memcmp_var(nonces[0], nonces[1], 32) != 0);
+    CHECK(kaspa_secp256k1_memcmp_var(nonces[0], nonces[1], 32) != 0);
 }
 
 /* Tests for the equality of two sha256 structs. This function only produces a
  * correct result if an integer multiple of 64 many bytes have been written
  * into the hash functions. */
-void test_sha256_eq(const secp256k1_sha256 *sha1, const secp256k1_sha256 *sha2) {
+void test_sha256_eq(const kaspa_secp256k1_sha256 *sha1, const kaspa_secp256k1_sha256 *sha2) {
     /* Is buffer fully consumed? */
     CHECK((sha1->bytes & 0x3F) == 0);
 
     CHECK(sha1->bytes == sha2->bytes);
-    CHECK(secp256k1_memcmp_var(sha1->s, sha2->s, sizeof(sha1->s)) == 0);
+    CHECK(kaspa_secp256k1_memcmp_var(sha1->s, sha2->s, sizeof(sha1->s)) == 0);
 }
 
 void run_nonce_function_bip340_tests(void) {
     unsigned char tag[13] = "BIP0340/nonce";
     unsigned char aux_tag[11] = "BIP0340/aux";
     unsigned char algo16[16] = "BIP0340/nonce\0\0\0";
-    secp256k1_sha256 sha;
-    secp256k1_sha256 sha_optimized;
+    kaspa_secp256k1_sha256 sha;
+    kaspa_secp256k1_sha256 sha_optimized;
     unsigned char nonce[32];
     unsigned char msg[32];
     unsigned char key[32];
@@ -46,23 +46,23 @@ void run_nonce_function_bip340_tests(void) {
     int i;
 
     /* Check that hash initialized by
-     * secp256k1_nonce_function_bip340_sha256_tagged has the expected
+     * kaspa_secp256k1_nonce_function_bip340_sha256_tagged has the expected
      * state. */
-    secp256k1_sha256_initialize_tagged(&sha, tag, sizeof(tag));
-    secp256k1_nonce_function_bip340_sha256_tagged(&sha_optimized);
+    kaspa_secp256k1_sha256_initialize_tagged(&sha, tag, sizeof(tag));
+    kaspa_secp256k1_nonce_function_bip340_sha256_tagged(&sha_optimized);
     test_sha256_eq(&sha, &sha_optimized);
 
    /* Check that hash initialized by
-    * secp256k1_nonce_function_bip340_sha256_tagged_aux has the expected
+    * kaspa_secp256k1_nonce_function_bip340_sha256_tagged_aux has the expected
     * state. */
-    secp256k1_sha256_initialize_tagged(&sha, aux_tag, sizeof(aux_tag));
-    secp256k1_nonce_function_bip340_sha256_tagged_aux(&sha_optimized);
+    kaspa_secp256k1_sha256_initialize_tagged(&sha, aux_tag, sizeof(aux_tag));
+    kaspa_secp256k1_nonce_function_bip340_sha256_tagged_aux(&sha_optimized);
     test_sha256_eq(&sha, &sha_optimized);
 
-    secp256k1_testrand256(msg);
-    secp256k1_testrand256(key);
-    secp256k1_testrand256(pk);
-    secp256k1_testrand256(aux_rand);
+    kaspa_secp256k1_testrand256(msg);
+    kaspa_secp256k1_testrand256(key);
+    kaspa_secp256k1_testrand256(pk);
+    kaspa_secp256k1_testrand256(aux_rand);
 
     /* Check that a bitflip in an argument results in different nonces. */
     args[0] = msg;
@@ -102,89 +102,89 @@ void test_schnorrsig_api(void) {
     unsigned char sk2[32];
     unsigned char sk3[32];
     unsigned char msg[32];
-    secp256k1_keypair keypairs[3];
-    secp256k1_keypair invalid_keypair = { 0 };
-    secp256k1_xonly_pubkey pk[3];
-    secp256k1_xonly_pubkey zero_pk;
+    kaspa_secp256k1_keypair keypairs[3];
+    kaspa_secp256k1_keypair invalid_keypair = { 0 };
+    kaspa_secp256k1_xonly_pubkey pk[3];
+    kaspa_secp256k1_xonly_pubkey zero_pk;
     unsigned char sig[64];
 
     /** setup **/
-    secp256k1_context *none = secp256k1_context_create(SECP256K1_CONTEXT_NONE);
-    secp256k1_context *sign = secp256k1_context_create(SECP256K1_CONTEXT_SIGN);
-    secp256k1_context *vrfy = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY);
-    secp256k1_context *both = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
+    kaspa_secp256k1_context *none = kaspa_secp256k1_context_create(kaspa_secp256k1_CONTEXT_NONE);
+    kaspa_secp256k1_context *sign = kaspa_secp256k1_context_create(kaspa_secp256k1_CONTEXT_SIGN);
+    kaspa_secp256k1_context *vrfy = kaspa_secp256k1_context_create(kaspa_secp256k1_CONTEXT_VERIFY);
+    kaspa_secp256k1_context *both = kaspa_secp256k1_context_create(kaspa_secp256k1_CONTEXT_SIGN | kaspa_secp256k1_CONTEXT_VERIFY);
     int ecount;
 
-    secp256k1_context_set_error_callback(none, counting_illegal_callback_fn, &ecount);
-    secp256k1_context_set_error_callback(sign, counting_illegal_callback_fn, &ecount);
-    secp256k1_context_set_error_callback(vrfy, counting_illegal_callback_fn, &ecount);
-    secp256k1_context_set_error_callback(both, counting_illegal_callback_fn, &ecount);
-    secp256k1_context_set_illegal_callback(none, counting_illegal_callback_fn, &ecount);
-    secp256k1_context_set_illegal_callback(sign, counting_illegal_callback_fn, &ecount);
-    secp256k1_context_set_illegal_callback(vrfy, counting_illegal_callback_fn, &ecount);
-    secp256k1_context_set_illegal_callback(both, counting_illegal_callback_fn, &ecount);
+    kaspa_secp256k1_context_set_error_callback(none, counting_illegal_callback_fn, &ecount);
+    kaspa_secp256k1_context_set_error_callback(sign, counting_illegal_callback_fn, &ecount);
+    kaspa_secp256k1_context_set_error_callback(vrfy, counting_illegal_callback_fn, &ecount);
+    kaspa_secp256k1_context_set_error_callback(both, counting_illegal_callback_fn, &ecount);
+    kaspa_secp256k1_context_set_illegal_callback(none, counting_illegal_callback_fn, &ecount);
+    kaspa_secp256k1_context_set_illegal_callback(sign, counting_illegal_callback_fn, &ecount);
+    kaspa_secp256k1_context_set_illegal_callback(vrfy, counting_illegal_callback_fn, &ecount);
+    kaspa_secp256k1_context_set_illegal_callback(both, counting_illegal_callback_fn, &ecount);
 
-    secp256k1_testrand256(sk1);
-    secp256k1_testrand256(sk2);
-    secp256k1_testrand256(sk3);
-    secp256k1_testrand256(msg);
-    CHECK(secp256k1_keypair_create(ctx, &keypairs[0], sk1) == 1);
-    CHECK(secp256k1_keypair_create(ctx, &keypairs[1], sk2) == 1);
-    CHECK(secp256k1_keypair_create(ctx, &keypairs[2], sk3) == 1);
-    CHECK(secp256k1_keypair_xonly_pub(ctx, &pk[0], NULL, &keypairs[0]) == 1);
-    CHECK(secp256k1_keypair_xonly_pub(ctx, &pk[1], NULL, &keypairs[1]) == 1);
-    CHECK(secp256k1_keypair_xonly_pub(ctx, &pk[2], NULL, &keypairs[2]) == 1);
+    kaspa_secp256k1_testrand256(sk1);
+    kaspa_secp256k1_testrand256(sk2);
+    kaspa_secp256k1_testrand256(sk3);
+    kaspa_secp256k1_testrand256(msg);
+    CHECK(kaspa_secp256k1_keypair_create(ctx, &keypairs[0], sk1) == 1);
+    CHECK(kaspa_secp256k1_keypair_create(ctx, &keypairs[1], sk2) == 1);
+    CHECK(kaspa_secp256k1_keypair_create(ctx, &keypairs[2], sk3) == 1);
+    CHECK(kaspa_secp256k1_keypair_xonly_pub(ctx, &pk[0], NULL, &keypairs[0]) == 1);
+    CHECK(kaspa_secp256k1_keypair_xonly_pub(ctx, &pk[1], NULL, &keypairs[1]) == 1);
+    CHECK(kaspa_secp256k1_keypair_xonly_pub(ctx, &pk[2], NULL, &keypairs[2]) == 1);
     memset(&zero_pk, 0, sizeof(zero_pk));
 
     /** main test body **/
     ecount = 0;
-    CHECK(secp256k1_schnorrsig_sign(none, sig, msg, &keypairs[0], NULL, NULL) == 0);
+    CHECK(kaspa_secp256k1_schnorrsig_sign(none, sig, msg, &keypairs[0], NULL, NULL) == 0);
     CHECK(ecount == 1);
-    CHECK(secp256k1_schnorrsig_sign(vrfy, sig, msg, &keypairs[0], NULL, NULL) == 0);
+    CHECK(kaspa_secp256k1_schnorrsig_sign(vrfy, sig, msg, &keypairs[0], NULL, NULL) == 0);
     CHECK(ecount == 2);
-    CHECK(secp256k1_schnorrsig_sign(sign, sig, msg, &keypairs[0], NULL, NULL) == 1);
+    CHECK(kaspa_secp256k1_schnorrsig_sign(sign, sig, msg, &keypairs[0], NULL, NULL) == 1);
     CHECK(ecount == 2);
-    CHECK(secp256k1_schnorrsig_sign(sign, NULL, msg, &keypairs[0], NULL, NULL) == 0);
+    CHECK(kaspa_secp256k1_schnorrsig_sign(sign, NULL, msg, &keypairs[0], NULL, NULL) == 0);
     CHECK(ecount == 3);
-    CHECK(secp256k1_schnorrsig_sign(sign, sig, NULL, &keypairs[0], NULL, NULL) == 0);
+    CHECK(kaspa_secp256k1_schnorrsig_sign(sign, sig, NULL, &keypairs[0], NULL, NULL) == 0);
     CHECK(ecount == 4);
-    CHECK(secp256k1_schnorrsig_sign(sign, sig, msg, NULL, NULL, NULL) == 0);
+    CHECK(kaspa_secp256k1_schnorrsig_sign(sign, sig, msg, NULL, NULL, NULL) == 0);
     CHECK(ecount == 5);
-    CHECK(secp256k1_schnorrsig_sign(sign, sig, msg, &invalid_keypair, NULL, NULL) == 0);
+    CHECK(kaspa_secp256k1_schnorrsig_sign(sign, sig, msg, &invalid_keypair, NULL, NULL) == 0);
     CHECK(ecount == 6);
 
     ecount = 0;
-    CHECK(secp256k1_schnorrsig_sign(sign, sig, msg, &keypairs[0], NULL, NULL) == 1);
-    CHECK(secp256k1_schnorrsig_verify(none, sig, msg, &pk[0]) == 0);
+    CHECK(kaspa_secp256k1_schnorrsig_sign(sign, sig, msg, &keypairs[0], NULL, NULL) == 1);
+    CHECK(kaspa_secp256k1_schnorrsig_verify(none, sig, msg, &pk[0]) == 0);
     CHECK(ecount == 1);
-    CHECK(secp256k1_schnorrsig_verify(sign, sig, msg, &pk[0]) == 0);
+    CHECK(kaspa_secp256k1_schnorrsig_verify(sign, sig, msg, &pk[0]) == 0);
     CHECK(ecount == 2);
-    CHECK(secp256k1_schnorrsig_verify(vrfy, sig, msg, &pk[0]) == 1);
+    CHECK(kaspa_secp256k1_schnorrsig_verify(vrfy, sig, msg, &pk[0]) == 1);
     CHECK(ecount == 2);
-    CHECK(secp256k1_schnorrsig_verify(vrfy, NULL, msg, &pk[0]) == 0);
+    CHECK(kaspa_secp256k1_schnorrsig_verify(vrfy, NULL, msg, &pk[0]) == 0);
     CHECK(ecount == 3);
-    CHECK(secp256k1_schnorrsig_verify(vrfy, sig, NULL, &pk[0]) == 0);
+    CHECK(kaspa_secp256k1_schnorrsig_verify(vrfy, sig, NULL, &pk[0]) == 0);
     CHECK(ecount == 4);
-    CHECK(secp256k1_schnorrsig_verify(vrfy, sig, msg, NULL) == 0);
+    CHECK(kaspa_secp256k1_schnorrsig_verify(vrfy, sig, msg, NULL) == 0);
     CHECK(ecount == 5);
-    CHECK(secp256k1_schnorrsig_verify(vrfy, sig, msg, &zero_pk) == 0);
+    CHECK(kaspa_secp256k1_schnorrsig_verify(vrfy, sig, msg, &zero_pk) == 0);
     CHECK(ecount == 6);
 
-    secp256k1_context_destroy(none);
-    secp256k1_context_destroy(sign);
-    secp256k1_context_destroy(vrfy);
-    secp256k1_context_destroy(both);
+    kaspa_secp256k1_context_destroy(none);
+    kaspa_secp256k1_context_destroy(sign);
+    kaspa_secp256k1_context_destroy(vrfy);
+    kaspa_secp256k1_context_destroy(both);
 }
 
-/* Checks that hash initialized by secp256k1_schnorrsig_sha256_tagged has the
+/* Checks that hash initialized by kaspa_secp256k1_schnorrsig_sha256_tagged has the
  * expected state. */
 void test_schnorrsig_sha256_tagged(void) {
     char tag[17] = "BIP0340/challenge";
-    secp256k1_sha256 sha;
-    secp256k1_sha256 sha_optimized;
+    kaspa_secp256k1_sha256 sha;
+    kaspa_secp256k1_sha256 sha_optimized;
 
-    secp256k1_sha256_initialize_tagged(&sha, (unsigned char *) tag, sizeof(tag));
-    secp256k1_schnorrsig_sha256_tagged(&sha_optimized);
+    kaspa_secp256k1_sha256_initialize_tagged(&sha, (unsigned char *) tag, sizeof(tag));
+    kaspa_secp256k1_schnorrsig_sha256_tagged(&sha_optimized);
     test_sha256_eq(&sha, &sha_optimized);
 }
 
@@ -192,26 +192,26 @@ void test_schnorrsig_sha256_tagged(void) {
  * Signs the message and checks that it's the same as expected_sig. */
 void test_schnorrsig_bip_vectors_check_signing(const unsigned char *sk, const unsigned char *pk_serialized, unsigned char *aux_rand, const unsigned char *msg, const unsigned char *expected_sig) {
     unsigned char sig[64];
-    secp256k1_keypair keypair;
-    secp256k1_xonly_pubkey pk, pk_expected;
+    kaspa_secp256k1_keypair keypair;
+    kaspa_secp256k1_xonly_pubkey pk, pk_expected;
 
-    CHECK(secp256k1_keypair_create(ctx, &keypair, sk));
-    CHECK(secp256k1_schnorrsig_sign(ctx, sig, msg, &keypair, NULL, aux_rand));
-    CHECK(secp256k1_memcmp_var(sig, expected_sig, 64) == 0);
+    CHECK(kaspa_secp256k1_keypair_create(ctx, &keypair, sk));
+    CHECK(kaspa_secp256k1_schnorrsig_sign(ctx, sig, msg, &keypair, NULL, aux_rand));
+    CHECK(kaspa_secp256k1_memcmp_var(sig, expected_sig, 64) == 0);
 
-    CHECK(secp256k1_xonly_pubkey_parse(ctx, &pk_expected, pk_serialized));
-    CHECK(secp256k1_keypair_xonly_pub(ctx, &pk, NULL, &keypair));
-    CHECK(secp256k1_memcmp_var(&pk, &pk_expected, sizeof(pk)) == 0);
-    CHECK(secp256k1_schnorrsig_verify(ctx, sig, msg, &pk));
+    CHECK(kaspa_secp256k1_xonly_pubkey_parse(ctx, &pk_expected, pk_serialized));
+    CHECK(kaspa_secp256k1_keypair_xonly_pub(ctx, &pk, NULL, &keypair));
+    CHECK(kaspa_secp256k1_memcmp_var(&pk, &pk_expected, sizeof(pk)) == 0);
+    CHECK(kaspa_secp256k1_schnorrsig_verify(ctx, sig, msg, &pk));
 }
 
 /* Helper function for schnorrsig_bip_vectors
  * Checks that both verify and verify_batch (TODO) return the same value as expected. */
 void test_schnorrsig_bip_vectors_check_verify(const unsigned char *pk_serialized, const unsigned char *msg32, const unsigned char *sig, int expected) {
-    secp256k1_xonly_pubkey pk;
+    kaspa_secp256k1_xonly_pubkey pk;
 
-    CHECK(secp256k1_xonly_pubkey_parse(ctx, &pk, pk_serialized));
-    CHECK(expected == secp256k1_schnorrsig_verify(ctx, sig, msg32, &pk));
+    CHECK(kaspa_secp256k1_xonly_pubkey_parse(ctx, &pk, pk_serialized));
+    CHECK(expected == kaspa_secp256k1_schnorrsig_verify(ctx, sig, msg32, &pk));
 }
 
 /* Test vectors according to BIP-340 ("Schnorr Signatures for secp256k1"). See
@@ -407,9 +407,9 @@ void test_schnorrsig_bip_vectors(void) {
             0xEB, 0x98, 0x98, 0xAE, 0x79, 0xB9, 0x76, 0x87,
             0x66, 0xE4, 0xFA, 0xA0, 0x4A, 0x2D, 0x4A, 0x34
         };
-        secp256k1_xonly_pubkey pk_parsed;
+        kaspa_secp256k1_xonly_pubkey pk_parsed;
         /* No need to check the signature of the test vector as parsing the pubkey already fails */
-        CHECK(!secp256k1_xonly_pubkey_parse(ctx, &pk_parsed, pk));
+        CHECK(!kaspa_secp256k1_xonly_pubkey_parse(ctx, &pk_parsed, pk));
     }
     {
         /* Test vector 6 */
@@ -627,9 +627,9 @@ void test_schnorrsig_bip_vectors(void) {
             0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
             0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFC, 0x30
         };
-        secp256k1_xonly_pubkey pk_parsed;
+        kaspa_secp256k1_xonly_pubkey pk_parsed;
         /* No need to check the signature of the test vector as parsing the pubkey already fails */
-        CHECK(!secp256k1_xonly_pubkey_parse(ctx, &pk_parsed, pk));
+        CHECK(!kaspa_secp256k1_xonly_pubkey_parse(ctx, &pk_parsed, pk));
     }
 }
 
@@ -670,24 +670,24 @@ static int nonce_function_overflowing(unsigned char *nonce32, const unsigned cha
 
 void test_schnorrsig_sign(void) {
     unsigned char sk[32];
-    secp256k1_keypair keypair;
+    kaspa_secp256k1_keypair keypair;
     const unsigned char msg[32] = "this is a msg for a schnorrsig..";
     unsigned char sig[64];
     unsigned char zeros64[64] = { 0 };
 
-    secp256k1_testrand256(sk);
-    CHECK(secp256k1_keypair_create(ctx, &keypair, sk));
-    CHECK(secp256k1_schnorrsig_sign(ctx, sig, msg, &keypair, NULL, NULL) == 1);
+    kaspa_secp256k1_testrand256(sk);
+    CHECK(kaspa_secp256k1_keypair_create(ctx, &keypair, sk));
+    CHECK(kaspa_secp256k1_schnorrsig_sign(ctx, sig, msg, &keypair, NULL, NULL) == 1);
 
     /* Test different nonce functions */
     memset(sig, 1, sizeof(sig));
-    CHECK(secp256k1_schnorrsig_sign(ctx, sig, msg, &keypair, nonce_function_failing, NULL) == 0);
-    CHECK(secp256k1_memcmp_var(sig, zeros64, sizeof(sig)) == 0);
+    CHECK(kaspa_secp256k1_schnorrsig_sign(ctx, sig, msg, &keypair, nonce_function_failing, NULL) == 0);
+    CHECK(kaspa_secp256k1_memcmp_var(sig, zeros64, sizeof(sig)) == 0);
     memset(&sig, 1, sizeof(sig));
-    CHECK(secp256k1_schnorrsig_sign(ctx, sig, msg, &keypair, nonce_function_0, NULL) == 0);
-    CHECK(secp256k1_memcmp_var(sig, zeros64, sizeof(sig)) == 0);
-    CHECK(secp256k1_schnorrsig_sign(ctx, sig, msg, &keypair, nonce_function_overflowing, NULL) == 1);
-    CHECK(secp256k1_memcmp_var(sig, zeros64, sizeof(sig)) != 0);
+    CHECK(kaspa_secp256k1_schnorrsig_sign(ctx, sig, msg, &keypair, nonce_function_0, NULL) == 0);
+    CHECK(kaspa_secp256k1_memcmp_var(sig, zeros64, sizeof(sig)) == 0);
+    CHECK(kaspa_secp256k1_schnorrsig_sign(ctx, sig, msg, &keypair, nonce_function_overflowing, NULL) == 1);
+    CHECK(kaspa_secp256k1_memcmp_var(sig, zeros64, sizeof(sig)) != 0);
 }
 
 #define N_SIGS 3
@@ -699,66 +699,66 @@ void test_schnorrsig_sign_verify(void) {
     unsigned char msg[N_SIGS][32];
     unsigned char sig[N_SIGS][64];
     size_t i;
-    secp256k1_keypair keypair;
-    secp256k1_xonly_pubkey pk;
-    secp256k1_scalar s;
+    kaspa_secp256k1_keypair keypair;
+    kaspa_secp256k1_xonly_pubkey pk;
+    kaspa_secp256k1_scalar s;
 
-    secp256k1_testrand256(sk);
-    CHECK(secp256k1_keypair_create(ctx, &keypair, sk));
-    CHECK(secp256k1_keypair_xonly_pub(ctx, &pk, NULL, &keypair));
+    kaspa_secp256k1_testrand256(sk);
+    CHECK(kaspa_secp256k1_keypair_create(ctx, &keypair, sk));
+    CHECK(kaspa_secp256k1_keypair_xonly_pub(ctx, &pk, NULL, &keypair));
 
     for (i = 0; i < N_SIGS; i++) {
-        secp256k1_testrand256(msg[i]);
-        CHECK(secp256k1_schnorrsig_sign(ctx, sig[i], msg[i], &keypair, NULL, NULL));
-        CHECK(secp256k1_schnorrsig_verify(ctx, sig[i], msg[i], &pk));
+        kaspa_secp256k1_testrand256(msg[i]);
+        CHECK(kaspa_secp256k1_schnorrsig_sign(ctx, sig[i], msg[i], &keypair, NULL, NULL));
+        CHECK(kaspa_secp256k1_schnorrsig_verify(ctx, sig[i], msg[i], &pk));
     }
 
     {
         /* Flip a few bits in the signature and in the message and check that
          * verify and verify_batch (TODO) fail */
-        size_t sig_idx = secp256k1_testrand_int(N_SIGS);
-        size_t byte_idx = secp256k1_testrand_int(32);
-        unsigned char xorbyte = secp256k1_testrand_int(254)+1;
+        size_t sig_idx = kaspa_secp256k1_testrand_int(N_SIGS);
+        size_t byte_idx = kaspa_secp256k1_testrand_int(32);
+        unsigned char xorbyte = kaspa_secp256k1_testrand_int(254)+1;
         sig[sig_idx][byte_idx] ^= xorbyte;
-        CHECK(!secp256k1_schnorrsig_verify(ctx, sig[sig_idx], msg[sig_idx], &pk));
+        CHECK(!kaspa_secp256k1_schnorrsig_verify(ctx, sig[sig_idx], msg[sig_idx], &pk));
         sig[sig_idx][byte_idx] ^= xorbyte;
 
-        byte_idx = secp256k1_testrand_int(32);
+        byte_idx = kaspa_secp256k1_testrand_int(32);
         sig[sig_idx][32+byte_idx] ^= xorbyte;
-        CHECK(!secp256k1_schnorrsig_verify(ctx, sig[sig_idx], msg[sig_idx], &pk));
+        CHECK(!kaspa_secp256k1_schnorrsig_verify(ctx, sig[sig_idx], msg[sig_idx], &pk));
         sig[sig_idx][32+byte_idx] ^= xorbyte;
 
-        byte_idx = secp256k1_testrand_int(32);
+        byte_idx = kaspa_secp256k1_testrand_int(32);
         msg[sig_idx][byte_idx] ^= xorbyte;
-        CHECK(!secp256k1_schnorrsig_verify(ctx, sig[sig_idx], msg[sig_idx], &pk));
+        CHECK(!kaspa_secp256k1_schnorrsig_verify(ctx, sig[sig_idx], msg[sig_idx], &pk));
         msg[sig_idx][byte_idx] ^= xorbyte;
 
         /* Check that above bitflips have been reversed correctly */
-        CHECK(secp256k1_schnorrsig_verify(ctx, sig[sig_idx], msg[sig_idx], &pk));
+        CHECK(kaspa_secp256k1_schnorrsig_verify(ctx, sig[sig_idx], msg[sig_idx], &pk));
     }
 
     /* Test overflowing s */
-    CHECK(secp256k1_schnorrsig_sign(ctx, sig[0], msg[0], &keypair, NULL, NULL));
-    CHECK(secp256k1_schnorrsig_verify(ctx, sig[0], msg[0], &pk));
+    CHECK(kaspa_secp256k1_schnorrsig_sign(ctx, sig[0], msg[0], &keypair, NULL, NULL));
+    CHECK(kaspa_secp256k1_schnorrsig_verify(ctx, sig[0], msg[0], &pk));
     memset(&sig[0][32], 0xFF, 32);
-    CHECK(!secp256k1_schnorrsig_verify(ctx, sig[0], msg[0], &pk));
+    CHECK(!kaspa_secp256k1_schnorrsig_verify(ctx, sig[0], msg[0], &pk));
 
     /* Test negative s */
-    CHECK(secp256k1_schnorrsig_sign(ctx, sig[0], msg[0], &keypair, NULL, NULL));
-    CHECK(secp256k1_schnorrsig_verify(ctx, sig[0], msg[0], &pk));
-    secp256k1_scalar_set_b32(&s, &sig[0][32], NULL);
-    secp256k1_scalar_negate(&s, &s);
-    secp256k1_scalar_get_b32(&sig[0][32], &s);
-    CHECK(!secp256k1_schnorrsig_verify(ctx, sig[0], msg[0], &pk));
+    CHECK(kaspa_secp256k1_schnorrsig_sign(ctx, sig[0], msg[0], &keypair, NULL, NULL));
+    CHECK(kaspa_secp256k1_schnorrsig_verify(ctx, sig[0], msg[0], &pk));
+    kaspa_secp256k1_scalar_set_b32(&s, &sig[0][32], NULL);
+    kaspa_secp256k1_scalar_negate(&s, &s);
+    kaspa_secp256k1_scalar_get_b32(&sig[0][32], &s);
+    CHECK(!kaspa_secp256k1_schnorrsig_verify(ctx, sig[0], msg[0], &pk));
 }
 #undef N_SIGS
 
 void test_schnorrsig_taproot(void) {
     unsigned char sk[32];
-    secp256k1_keypair keypair;
-    secp256k1_xonly_pubkey internal_pk;
+    kaspa_secp256k1_keypair keypair;
+    kaspa_secp256k1_xonly_pubkey internal_pk;
     unsigned char internal_pk_bytes[32];
-    secp256k1_xonly_pubkey output_pk;
+    kaspa_secp256k1_xonly_pubkey output_pk;
     unsigned char output_pk_bytes[32];
     unsigned char tweak[32];
     int pk_parity;
@@ -766,27 +766,27 @@ void test_schnorrsig_taproot(void) {
     unsigned char sig[64];
 
     /* Create output key */
-    secp256k1_testrand256(sk);
-    CHECK(secp256k1_keypair_create(ctx, &keypair, sk) == 1);
-    CHECK(secp256k1_keypair_xonly_pub(ctx, &internal_pk, NULL, &keypair) == 1);
+    kaspa_secp256k1_testrand256(sk);
+    CHECK(kaspa_secp256k1_keypair_create(ctx, &keypair, sk) == 1);
+    CHECK(kaspa_secp256k1_keypair_xonly_pub(ctx, &internal_pk, NULL, &keypair) == 1);
     /* In actual taproot the tweak would be hash of internal_pk */
-    CHECK(secp256k1_xonly_pubkey_serialize(ctx, tweak, &internal_pk) == 1);
-    CHECK(secp256k1_keypair_xonly_tweak_add(ctx, &keypair, tweak) == 1);
-    CHECK(secp256k1_keypair_xonly_pub(ctx, &output_pk, &pk_parity, &keypair) == 1);
-    CHECK(secp256k1_xonly_pubkey_serialize(ctx, output_pk_bytes, &output_pk) == 1);
+    CHECK(kaspa_secp256k1_xonly_pubkey_serialize(ctx, tweak, &internal_pk) == 1);
+    CHECK(kaspa_secp256k1_keypair_xonly_tweak_add(ctx, &keypair, tweak) == 1);
+    CHECK(kaspa_secp256k1_keypair_xonly_pub(ctx, &output_pk, &pk_parity, &keypair) == 1);
+    CHECK(kaspa_secp256k1_xonly_pubkey_serialize(ctx, output_pk_bytes, &output_pk) == 1);
 
     /* Key spend */
-    secp256k1_testrand256(msg);
-    CHECK(secp256k1_schnorrsig_sign(ctx, sig, msg, &keypair, NULL, NULL) == 1);
+    kaspa_secp256k1_testrand256(msg);
+    CHECK(kaspa_secp256k1_schnorrsig_sign(ctx, sig, msg, &keypair, NULL, NULL) == 1);
     /* Verify key spend */
-    CHECK(secp256k1_xonly_pubkey_parse(ctx, &output_pk, output_pk_bytes) == 1);
-    CHECK(secp256k1_schnorrsig_verify(ctx, sig, msg, &output_pk) == 1);
+    CHECK(kaspa_secp256k1_xonly_pubkey_parse(ctx, &output_pk, output_pk_bytes) == 1);
+    CHECK(kaspa_secp256k1_schnorrsig_verify(ctx, sig, msg, &output_pk) == 1);
 
     /* Script spend */
-    CHECK(secp256k1_xonly_pubkey_serialize(ctx, internal_pk_bytes, &internal_pk) == 1);
+    CHECK(kaspa_secp256k1_xonly_pubkey_serialize(ctx, internal_pk_bytes, &internal_pk) == 1);
     /* Verify script spend */
-    CHECK(secp256k1_xonly_pubkey_parse(ctx, &internal_pk, internal_pk_bytes) == 1);
-    CHECK(secp256k1_xonly_pubkey_tweak_add_check(ctx, output_pk_bytes, pk_parity, &internal_pk, tweak) == 1);
+    CHECK(kaspa_secp256k1_xonly_pubkey_parse(ctx, &internal_pk, internal_pk_bytes) == 1);
+    CHECK(kaspa_secp256k1_xonly_pubkey_tweak_add_check(ctx, output_pk_bytes, pk_parity, &internal_pk, tweak) == 1);
 }
 
 void run_schnorrsig_tests(void) {

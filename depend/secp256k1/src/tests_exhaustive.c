@@ -29,37 +29,37 @@
 static int count = 2;
 
 /** stolen from tests.c */
-void ge_equals_ge(const secp256k1_ge *a, const secp256k1_ge *b) {
+void ge_equals_ge(const kaspa_secp256k1_ge *a, const kaspa_secp256k1_ge *b) {
     CHECK(a->infinity == b->infinity);
     if (a->infinity) {
         return;
     }
-    CHECK(secp256k1_fe_equal_var(&a->x, &b->x));
-    CHECK(secp256k1_fe_equal_var(&a->y, &b->y));
+    CHECK(kaspa_secp256k1_fe_equal_var(&a->x, &b->x));
+    CHECK(kaspa_secp256k1_fe_equal_var(&a->y, &b->y));
 }
 
-void ge_equals_gej(const secp256k1_ge *a, const secp256k1_gej *b) {
-    secp256k1_fe z2s;
-    secp256k1_fe u1, u2, s1, s2;
+void ge_equals_gej(const kaspa_secp256k1_ge *a, const kaspa_secp256k1_gej *b) {
+    kaspa_secp256k1_fe z2s;
+    kaspa_secp256k1_fe u1, u2, s1, s2;
     CHECK(a->infinity == b->infinity);
     if (a->infinity) {
         return;
     }
     /* Check a.x * b.z^2 == b.x && a.y * b.z^3 == b.y, to avoid inverses. */
-    secp256k1_fe_sqr(&z2s, &b->z);
-    secp256k1_fe_mul(&u1, &a->x, &z2s);
-    u2 = b->x; secp256k1_fe_normalize_weak(&u2);
-    secp256k1_fe_mul(&s1, &a->y, &z2s); secp256k1_fe_mul(&s1, &s1, &b->z);
-    s2 = b->y; secp256k1_fe_normalize_weak(&s2);
-    CHECK(secp256k1_fe_equal_var(&u1, &u2));
-    CHECK(secp256k1_fe_equal_var(&s1, &s2));
+    kaspa_secp256k1_fe_sqr(&z2s, &b->z);
+    kaspa_secp256k1_fe_mul(&u1, &a->x, &z2s);
+    u2 = b->x; kaspa_secp256k1_fe_normalize_weak(&u2);
+    kaspa_secp256k1_fe_mul(&s1, &a->y, &z2s); kaspa_secp256k1_fe_mul(&s1, &s1, &b->z);
+    s2 = b->y; kaspa_secp256k1_fe_normalize_weak(&s2);
+    CHECK(kaspa_secp256k1_fe_equal_var(&u1, &u2));
+    CHECK(kaspa_secp256k1_fe_equal_var(&s1, &s2));
 }
 
-void random_fe(secp256k1_fe *x) {
+void random_fe(kaspa_secp256k1_fe *x) {
     unsigned char bin[32];
     do {
-        secp256k1_testrand256(bin);
-        if (secp256k1_fe_set_b32(x, bin)) {
+        kaspa_secp256k1_testrand256(bin);
+        if (kaspa_secp256k1_fe_set_b32(x, bin)) {
             return;
         }
     } while(1);
@@ -69,16 +69,16 @@ void random_fe(secp256k1_fe *x) {
 static uint32_t num_cores = 1;
 static uint32_t this_core = 0;
 
-SECP256K1_INLINE static int skip_section(uint64_t* iter) {
+kaspa_secp256k1_INLINE static int skip_section(uint64_t* iter) {
     if (num_cores == 1) return 0;
     *iter += 0xe7037ed1a0b428dbULL;
     return ((((uint32_t)*iter ^ (*iter >> 32)) * num_cores) >> 32) != this_core;
 }
 
-int secp256k1_nonce_function_smallint(unsigned char *nonce32, const unsigned char *msg32,
+int kaspa_secp256k1_nonce_function_smallint(unsigned char *nonce32, const unsigned char *msg32,
                                       const unsigned char *key32, const unsigned char *algo16,
                                       void *data, unsigned int attempt) {
-    secp256k1_scalar s;
+    kaspa_secp256k1_scalar s;
     int *idata = data;
     (void)msg32;
     (void)key32;
@@ -90,97 +90,97 @@ int secp256k1_nonce_function_smallint(unsigned char *nonce32, const unsigned cha
     if (attempt > 0) {
         *idata = (*idata + 1) % EXHAUSTIVE_TEST_ORDER;
     }
-    secp256k1_scalar_set_int(&s, *idata);
-    secp256k1_scalar_get_b32(nonce32, &s);
+    kaspa_secp256k1_scalar_set_int(&s, *idata);
+    kaspa_secp256k1_scalar_get_b32(nonce32, &s);
     return 1;
 }
 
-void test_exhaustive_endomorphism(const secp256k1_ge *group) {
+void test_exhaustive_endomorphism(const kaspa_secp256k1_ge *group) {
     int i;
     for (i = 0; i < EXHAUSTIVE_TEST_ORDER; i++) {
-        secp256k1_ge res;
-        secp256k1_ge_mul_lambda(&res, &group[i]);
+        kaspa_secp256k1_ge res;
+        kaspa_secp256k1_ge_mul_lambda(&res, &group[i]);
         ge_equals_ge(&group[i * EXHAUSTIVE_TEST_LAMBDA % EXHAUSTIVE_TEST_ORDER], &res);
     }
 }
 
-void test_exhaustive_addition(const secp256k1_ge *group, const secp256k1_gej *groupj) {
+void test_exhaustive_addition(const kaspa_secp256k1_ge *group, const kaspa_secp256k1_gej *groupj) {
     int i, j;
     uint64_t iter = 0;
 
     /* Sanity-check (and check infinity functions) */
-    CHECK(secp256k1_ge_is_infinity(&group[0]));
-    CHECK(secp256k1_gej_is_infinity(&groupj[0]));
+    CHECK(kaspa_secp256k1_ge_is_infinity(&group[0]));
+    CHECK(kaspa_secp256k1_gej_is_infinity(&groupj[0]));
     for (i = 1; i < EXHAUSTIVE_TEST_ORDER; i++) {
-        CHECK(!secp256k1_ge_is_infinity(&group[i]));
-        CHECK(!secp256k1_gej_is_infinity(&groupj[i]));
+        CHECK(!kaspa_secp256k1_ge_is_infinity(&group[i]));
+        CHECK(!kaspa_secp256k1_gej_is_infinity(&groupj[i]));
     }
 
     /* Check all addition formulae */
     for (j = 0; j < EXHAUSTIVE_TEST_ORDER; j++) {
-        secp256k1_fe fe_inv;
+        kaspa_secp256k1_fe fe_inv;
         if (skip_section(&iter)) continue;
-        secp256k1_fe_inv(&fe_inv, &groupj[j].z);
+        kaspa_secp256k1_fe_inv(&fe_inv, &groupj[j].z);
         for (i = 0; i < EXHAUSTIVE_TEST_ORDER; i++) {
-            secp256k1_ge zless_gej;
-            secp256k1_gej tmp;
+            kaspa_secp256k1_ge zless_gej;
+            kaspa_secp256k1_gej tmp;
             /* add_var */
-            secp256k1_gej_add_var(&tmp, &groupj[i], &groupj[j], NULL);
+            kaspa_secp256k1_gej_add_var(&tmp, &groupj[i], &groupj[j], NULL);
             ge_equals_gej(&group[(i + j) % EXHAUSTIVE_TEST_ORDER], &tmp);
             /* add_ge */
             if (j > 0) {
-                secp256k1_gej_add_ge(&tmp, &groupj[i], &group[j]);
+                kaspa_secp256k1_gej_add_ge(&tmp, &groupj[i], &group[j]);
                 ge_equals_gej(&group[(i + j) % EXHAUSTIVE_TEST_ORDER], &tmp);
             }
             /* add_ge_var */
-            secp256k1_gej_add_ge_var(&tmp, &groupj[i], &group[j], NULL);
+            kaspa_secp256k1_gej_add_ge_var(&tmp, &groupj[i], &group[j], NULL);
             ge_equals_gej(&group[(i + j) % EXHAUSTIVE_TEST_ORDER], &tmp);
             /* add_zinv_var */
             zless_gej.infinity = groupj[j].infinity;
             zless_gej.x = groupj[j].x;
             zless_gej.y = groupj[j].y;
-            secp256k1_gej_add_zinv_var(&tmp, &groupj[i], &zless_gej, &fe_inv);
+            kaspa_secp256k1_gej_add_zinv_var(&tmp, &groupj[i], &zless_gej, &fe_inv);
             ge_equals_gej(&group[(i + j) % EXHAUSTIVE_TEST_ORDER], &tmp);
         }
     }
 
     /* Check doubling */
     for (i = 0; i < EXHAUSTIVE_TEST_ORDER; i++) {
-        secp256k1_gej tmp;
-        secp256k1_gej_double(&tmp, &groupj[i]);
+        kaspa_secp256k1_gej tmp;
+        kaspa_secp256k1_gej_double(&tmp, &groupj[i]);
         ge_equals_gej(&group[(2 * i) % EXHAUSTIVE_TEST_ORDER], &tmp);
-        secp256k1_gej_double_var(&tmp, &groupj[i], NULL);
+        kaspa_secp256k1_gej_double_var(&tmp, &groupj[i], NULL);
         ge_equals_gej(&group[(2 * i) % EXHAUSTIVE_TEST_ORDER], &tmp);
     }
 
     /* Check negation */
     for (i = 1; i < EXHAUSTIVE_TEST_ORDER; i++) {
-        secp256k1_ge tmp;
-        secp256k1_gej tmpj;
-        secp256k1_ge_neg(&tmp, &group[i]);
+        kaspa_secp256k1_ge tmp;
+        kaspa_secp256k1_gej tmpj;
+        kaspa_secp256k1_ge_neg(&tmp, &group[i]);
         ge_equals_ge(&group[EXHAUSTIVE_TEST_ORDER - i], &tmp);
-        secp256k1_gej_neg(&tmpj, &groupj[i]);
+        kaspa_secp256k1_gej_neg(&tmpj, &groupj[i]);
         ge_equals_gej(&group[EXHAUSTIVE_TEST_ORDER - i], &tmpj);
     }
 }
 
-void test_exhaustive_ecmult(const secp256k1_context *ctx, const secp256k1_ge *group, const secp256k1_gej *groupj) {
+void test_exhaustive_ecmult(const kaspa_secp256k1_context *ctx, const kaspa_secp256k1_ge *group, const kaspa_secp256k1_gej *groupj) {
     int i, j, r_log;
     uint64_t iter = 0;
     for (r_log = 1; r_log < EXHAUSTIVE_TEST_ORDER; r_log++) {
         for (j = 0; j < EXHAUSTIVE_TEST_ORDER; j++) {
             if (skip_section(&iter)) continue;
             for (i = 0; i < EXHAUSTIVE_TEST_ORDER; i++) {
-                secp256k1_gej tmp;
-                secp256k1_scalar na, ng;
-                secp256k1_scalar_set_int(&na, i);
-                secp256k1_scalar_set_int(&ng, j);
+                kaspa_secp256k1_gej tmp;
+                kaspa_secp256k1_scalar na, ng;
+                kaspa_secp256k1_scalar_set_int(&na, i);
+                kaspa_secp256k1_scalar_set_int(&ng, j);
 
-                secp256k1_ecmult(&ctx->ecmult_ctx, &tmp, &groupj[r_log], &na, &ng);
+                kaspa_secp256k1_ecmult(&ctx->ecmult_ctx, &tmp, &groupj[r_log], &na, &ng);
                 ge_equals_gej(&group[(i * r_log + j) % EXHAUSTIVE_TEST_ORDER], &tmp);
 
                 if (i > 0) {
-                    secp256k1_ecmult_const(&tmp, &group[i], &ng, 256);
+                    kaspa_secp256k1_ecmult_const(&tmp, &group[i], &ng, 256);
                     ge_equals_gej(&group[(i * j) % EXHAUSTIVE_TEST_ORDER], &tmp);
                 }
             }
@@ -189,111 +189,111 @@ void test_exhaustive_ecmult(const secp256k1_context *ctx, const secp256k1_ge *gr
 }
 
 typedef struct {
-    secp256k1_scalar sc[2];
-    secp256k1_ge pt[2];
+    kaspa_secp256k1_scalar sc[2];
+    kaspa_secp256k1_ge pt[2];
 } ecmult_multi_data;
 
-static int ecmult_multi_callback(secp256k1_scalar *sc, secp256k1_ge *pt, size_t idx, void *cbdata) {
+static int ecmult_multi_callback(kaspa_secp256k1_scalar *sc, kaspa_secp256k1_ge *pt, size_t idx, void *cbdata) {
     ecmult_multi_data *data = (ecmult_multi_data*) cbdata;
     *sc = data->sc[idx];
     *pt = data->pt[idx];
     return 1;
 }
 
-void test_exhaustive_ecmult_multi(const secp256k1_context *ctx, const secp256k1_ge *group) {
+void test_exhaustive_ecmult_multi(const kaspa_secp256k1_context *ctx, const kaspa_secp256k1_ge *group) {
     int i, j, k, x, y;
     uint64_t iter = 0;
-    secp256k1_scratch *scratch = secp256k1_scratch_create(&ctx->error_callback, 4096);
+    kaspa_secp256k1_scratch *scratch = kaspa_secp256k1_scratch_create(&ctx->error_callback, 4096);
     for (i = 0; i < EXHAUSTIVE_TEST_ORDER; i++) {
         for (j = 0; j < EXHAUSTIVE_TEST_ORDER; j++) {
             for (k = 0; k < EXHAUSTIVE_TEST_ORDER; k++) {
                 for (x = 0; x < EXHAUSTIVE_TEST_ORDER; x++) {
                     if (skip_section(&iter)) continue;
                     for (y = 0; y < EXHAUSTIVE_TEST_ORDER; y++) {
-                        secp256k1_gej tmp;
-                        secp256k1_scalar g_sc;
+                        kaspa_secp256k1_gej tmp;
+                        kaspa_secp256k1_scalar g_sc;
                         ecmult_multi_data data;
 
-                        secp256k1_scalar_set_int(&data.sc[0], i);
-                        secp256k1_scalar_set_int(&data.sc[1], j);
-                        secp256k1_scalar_set_int(&g_sc, k);
+                        kaspa_secp256k1_scalar_set_int(&data.sc[0], i);
+                        kaspa_secp256k1_scalar_set_int(&data.sc[1], j);
+                        kaspa_secp256k1_scalar_set_int(&g_sc, k);
                         data.pt[0] = group[x];
                         data.pt[1] = group[y];
 
-                        secp256k1_ecmult_multi_var(&ctx->error_callback, &ctx->ecmult_ctx, scratch, &tmp, &g_sc, ecmult_multi_callback, &data, 2);
+                        kaspa_secp256k1_ecmult_multi_var(&ctx->error_callback, &ctx->ecmult_ctx, scratch, &tmp, &g_sc, ecmult_multi_callback, &data, 2);
                         ge_equals_gej(&group[(i * x + j * y + k) % EXHAUSTIVE_TEST_ORDER], &tmp);
                     }
                 }
             }
         }
     }
-    secp256k1_scratch_destroy(&ctx->error_callback, scratch);
+    kaspa_secp256k1_scratch_destroy(&ctx->error_callback, scratch);
 }
 
-void r_from_k(secp256k1_scalar *r, const secp256k1_ge *group, int k, int* overflow) {
-    secp256k1_fe x;
+void r_from_k(kaspa_secp256k1_scalar *r, const kaspa_secp256k1_ge *group, int k, int* overflow) {
+    kaspa_secp256k1_fe x;
     unsigned char x_bin[32];
     k %= EXHAUSTIVE_TEST_ORDER;
     x = group[k].x;
-    secp256k1_fe_normalize(&x);
-    secp256k1_fe_get_b32(x_bin, &x);
-    secp256k1_scalar_set_b32(r, x_bin, overflow);
+    kaspa_secp256k1_fe_normalize(&x);
+    kaspa_secp256k1_fe_get_b32(x_bin, &x);
+    kaspa_secp256k1_scalar_set_b32(r, x_bin, overflow);
 }
 
-void test_exhaustive_verify(const secp256k1_context *ctx, const secp256k1_ge *group) {
+void test_exhaustive_verify(const kaspa_secp256k1_context *ctx, const kaspa_secp256k1_ge *group) {
     int s, r, msg, key;
     uint64_t iter = 0;
     for (s = 1; s < EXHAUSTIVE_TEST_ORDER; s++) {
         for (r = 1; r < EXHAUSTIVE_TEST_ORDER; r++) {
             for (msg = 1; msg < EXHAUSTIVE_TEST_ORDER; msg++) {
                 for (key = 1; key < EXHAUSTIVE_TEST_ORDER; key++) {
-                    secp256k1_ge nonconst_ge;
-                    secp256k1_ecdsa_signature sig;
-                    secp256k1_pubkey pk;
-                    secp256k1_scalar sk_s, msg_s, r_s, s_s;
-                    secp256k1_scalar s_times_k_s, msg_plus_r_times_sk_s;
+                    kaspa_secp256k1_ge nonconst_ge;
+                    kaspa_secp256k1_ecdsa_signature sig;
+                    kaspa_secp256k1_pubkey pk;
+                    kaspa_secp256k1_scalar sk_s, msg_s, r_s, s_s;
+                    kaspa_secp256k1_scalar s_times_k_s, msg_plus_r_times_sk_s;
                     int k, should_verify;
                     unsigned char msg32[32];
 
                     if (skip_section(&iter)) continue;
 
-                    secp256k1_scalar_set_int(&s_s, s);
-                    secp256k1_scalar_set_int(&r_s, r);
-                    secp256k1_scalar_set_int(&msg_s, msg);
-                    secp256k1_scalar_set_int(&sk_s, key);
+                    kaspa_secp256k1_scalar_set_int(&s_s, s);
+                    kaspa_secp256k1_scalar_set_int(&r_s, r);
+                    kaspa_secp256k1_scalar_set_int(&msg_s, msg);
+                    kaspa_secp256k1_scalar_set_int(&sk_s, key);
 
                     /* Verify by hand */
                     /* Run through every k value that gives us this r and check that *one* works.
                      * Note there could be none, there could be multiple, ECDSA is weird. */
                     should_verify = 0;
                     for (k = 0; k < EXHAUSTIVE_TEST_ORDER; k++) {
-                        secp256k1_scalar check_x_s;
+                        kaspa_secp256k1_scalar check_x_s;
                         r_from_k(&check_x_s, group, k, NULL);
                         if (r_s == check_x_s) {
-                            secp256k1_scalar_set_int(&s_times_k_s, k);
-                            secp256k1_scalar_mul(&s_times_k_s, &s_times_k_s, &s_s);
-                            secp256k1_scalar_mul(&msg_plus_r_times_sk_s, &r_s, &sk_s);
-                            secp256k1_scalar_add(&msg_plus_r_times_sk_s, &msg_plus_r_times_sk_s, &msg_s);
-                            should_verify |= secp256k1_scalar_eq(&s_times_k_s, &msg_plus_r_times_sk_s);
+                            kaspa_secp256k1_scalar_set_int(&s_times_k_s, k);
+                            kaspa_secp256k1_scalar_mul(&s_times_k_s, &s_times_k_s, &s_s);
+                            kaspa_secp256k1_scalar_mul(&msg_plus_r_times_sk_s, &r_s, &sk_s);
+                            kaspa_secp256k1_scalar_add(&msg_plus_r_times_sk_s, &msg_plus_r_times_sk_s, &msg_s);
+                            should_verify |= kaspa_secp256k1_scalar_eq(&s_times_k_s, &msg_plus_r_times_sk_s);
                         }
                     }
                     /* nb we have a "high s" rule */
-                    should_verify &= !secp256k1_scalar_is_high(&s_s);
+                    should_verify &= !kaspa_secp256k1_scalar_is_high(&s_s);
 
                     /* Verify by calling verify */
-                    secp256k1_ecdsa_signature_save(&sig, &r_s, &s_s);
+                    kaspa_secp256k1_ecdsa_signature_save(&sig, &r_s, &s_s);
                     memcpy(&nonconst_ge, &group[sk_s], sizeof(nonconst_ge));
-                    secp256k1_pubkey_save(&pk, &nonconst_ge);
-                    secp256k1_scalar_get_b32(msg32, &msg_s);
+                    kaspa_secp256k1_pubkey_save(&pk, &nonconst_ge);
+                    kaspa_secp256k1_scalar_get_b32(msg32, &msg_s);
                     CHECK(should_verify ==
-                          secp256k1_ecdsa_verify(ctx, &sig, msg32, &pk));
+                          kaspa_secp256k1_ecdsa_verify(ctx, &sig, msg32, &pk));
                 }
             }
         }
     }
 }
 
-void test_exhaustive_sign(const secp256k1_context *ctx, const secp256k1_ge *group) {
+void test_exhaustive_sign(const kaspa_secp256k1_context *ctx, const kaspa_secp256k1_ge *group) {
     int i, j, k;
     uint64_t iter = 0;
 
@@ -303,17 +303,17 @@ void test_exhaustive_sign(const secp256k1_context *ctx, const secp256k1_ge *grou
             if (skip_section(&iter)) continue;
             for (k = 1; k < EXHAUSTIVE_TEST_ORDER; k++) {  /* nonce */
                 const int starting_k = k;
-                secp256k1_ecdsa_signature sig;
-                secp256k1_scalar sk, msg, r, s, expected_r;
+                kaspa_secp256k1_ecdsa_signature sig;
+                kaspa_secp256k1_scalar sk, msg, r, s, expected_r;
                 unsigned char sk32[32], msg32[32];
-                secp256k1_scalar_set_int(&msg, i);
-                secp256k1_scalar_set_int(&sk, j);
-                secp256k1_scalar_get_b32(sk32, &sk);
-                secp256k1_scalar_get_b32(msg32, &msg);
+                kaspa_secp256k1_scalar_set_int(&msg, i);
+                kaspa_secp256k1_scalar_set_int(&sk, j);
+                kaspa_secp256k1_scalar_get_b32(sk32, &sk);
+                kaspa_secp256k1_scalar_get_b32(msg32, &msg);
 
-                secp256k1_ecdsa_sign(ctx, &sig, msg32, sk32, secp256k1_nonce_function_smallint, &k);
+                kaspa_secp256k1_ecdsa_sign(ctx, &sig, msg32, sk32, kaspa_secp256k1_nonce_function_smallint, &k);
 
-                secp256k1_ecdsa_signature_load(ctx, &r, &s, &sig);
+                kaspa_secp256k1_ecdsa_signature_load(ctx, &r, &s, &sig);
                 /* Note that we compute expected_r *after* signing -- this is important
                  * because our nonce-computing function function might change k during
                  * signing. */
@@ -354,10 +354,10 @@ void test_exhaustive_sign(const secp256k1_context *ctx, const secp256k1_ge *grou
 
 int main(int argc, char** argv) {
     int i;
-    secp256k1_gej groupj[EXHAUSTIVE_TEST_ORDER];
-    secp256k1_ge group[EXHAUSTIVE_TEST_ORDER];
+    kaspa_secp256k1_gej groupj[EXHAUSTIVE_TEST_ORDER];
+    kaspa_secp256k1_ge group[EXHAUSTIVE_TEST_ORDER];
     unsigned char rand32[32];
-    secp256k1_context *ctx;
+    kaspa_secp256k1_context *ctx;
 
     /* Disable buffering for stdout to improve reliability of getting
      * diagnostic information. Happens right at the start of main because
@@ -376,7 +376,7 @@ int main(int argc, char** argv) {
     printf("test count = %i\n", count);
 
     /* find random seed */
-    secp256k1_testrand_init(argc > 2 ? argv[2] : NULL);
+    kaspa_secp256k1_testrand_init(argc > 2 ? argv[2] : NULL);
 
     /* set up split processing */
     if (argc > 4) {
@@ -391,38 +391,38 @@ int main(int argc, char** argv) {
 
     while (count--) {
         /* Build context */
-        ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
-        secp256k1_testrand256(rand32);
-        CHECK(secp256k1_context_randomize(ctx, rand32));
+        ctx = kaspa_secp256k1_context_create(kaspa_secp256k1_CONTEXT_SIGN | kaspa_secp256k1_CONTEXT_VERIFY);
+        kaspa_secp256k1_testrand256(rand32);
+        CHECK(kaspa_secp256k1_context_randomize(ctx, rand32));
 
         /* Generate the entire group */
-        secp256k1_gej_set_infinity(&groupj[0]);
-        secp256k1_ge_set_gej(&group[0], &groupj[0]);
+        kaspa_secp256k1_gej_set_infinity(&groupj[0]);
+        kaspa_secp256k1_ge_set_gej(&group[0], &groupj[0]);
         for (i = 1; i < EXHAUSTIVE_TEST_ORDER; i++) {
-            secp256k1_gej_add_ge(&groupj[i], &groupj[i - 1], &secp256k1_ge_const_g);
-            secp256k1_ge_set_gej(&group[i], &groupj[i]);
+            kaspa_secp256k1_gej_add_ge(&groupj[i], &groupj[i - 1], &kaspa_secp256k1_ge_const_g);
+            kaspa_secp256k1_ge_set_gej(&group[i], &groupj[i]);
             if (count != 0) {
                 /* Set a different random z-value for each Jacobian point, except z=1
                    is used in the last iteration. */
-                secp256k1_fe z;
+                kaspa_secp256k1_fe z;
                 random_fe(&z);
-                secp256k1_gej_rescale(&groupj[i], &z);
+                kaspa_secp256k1_gej_rescale(&groupj[i], &z);
             }
 
             /* Verify against ecmult_gen */
             {
-                secp256k1_scalar scalar_i;
-                secp256k1_gej generatedj;
-                secp256k1_ge generated;
+                kaspa_secp256k1_scalar scalar_i;
+                kaspa_secp256k1_gej generatedj;
+                kaspa_secp256k1_ge generated;
 
-                secp256k1_scalar_set_int(&scalar_i, i);
-                secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &generatedj, &scalar_i);
-                secp256k1_ge_set_gej(&generated, &generatedj);
+                kaspa_secp256k1_scalar_set_int(&scalar_i, i);
+                kaspa_secp256k1_ecmult_gen(&ctx->ecmult_gen_ctx, &generatedj, &scalar_i);
+                kaspa_secp256k1_ge_set_gej(&generated, &generatedj);
 
                 CHECK(group[i].infinity == 0);
                 CHECK(generated.infinity == 0);
-                CHECK(secp256k1_fe_equal_var(&generated.x, &group[i].x));
-                CHECK(secp256k1_fe_equal_var(&generated.y, &group[i].y));
+                CHECK(kaspa_secp256k1_fe_equal_var(&generated.x, &group[i].x));
+                CHECK(kaspa_secp256k1_fe_equal_var(&generated.y, &group[i].y));
             }
         }
 
@@ -444,10 +444,10 @@ int main(int argc, char** argv) {
         test_exhaustive_schnorrsig(ctx);
 #endif
 
-        secp256k1_context_destroy(ctx);
+        kaspa_secp256k1_context_destroy(ctx);
     }
 
-    secp256k1_testrand_finish();
+    kaspa_secp256k1_testrand_finish();
 
     printf("no problems found\n");
     return 0;

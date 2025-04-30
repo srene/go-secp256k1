@@ -4,8 +4,9 @@ package secp256k1
 import "C"
 import (
 	"crypto/rand"
-	"github.com/pkg/errors"
 	"unsafe"
+
+	"github.com/pkg/errors"
 )
 
 // ECDSAPrivateKey is a type representing a Secp256k1 ECDSA private key.
@@ -21,7 +22,7 @@ func (key *ECDSAPrivateKey) ECDSAPublicKey() (*ECDSAPublicKey, error) {
 	}
 	pubkey := ECDSAPublicKey{init: true}
 	cPtrPrivateKey := (*C.uchar)(&key.privateKey[0])
-	ret := C.secp256k1_ec_pubkey_create(context, &pubkey.pubkey, cPtrPrivateKey)
+	ret := C.kaspa_secp256k1_ec_pubkey_create(context, &pubkey.pubkey, cPtrPrivateKey)
 	if ret != 1 {
 		return nil, errors.New("failed Generating an ECDSAPublicKey. You should call `DeserializeECDSAPrivateKey` before calling this")
 	}
@@ -47,7 +48,7 @@ func (key *ECDSAPrivateKey) ecdsaSignInternal(hash *Hash, auxiliaryRand *[32]byt
 	cPtrHash := (*C.uchar)(&hash[0])
 	cPtrPrivKey := (*C.uchar)(&key.privateKey[0])
 	cPtrAux := unsafe.Pointer(auxiliaryRand)
-	ret := C.secp256k1_ecdsa_sign(context, &signature.signature, cPtrHash, cPtrPrivKey, C.secp256k1_nonce_function_rfc6979, cPtrAux)
+	ret := C.kaspa_secp256k1_ecdsa_sign(context, &signature.signature, cPtrHash, cPtrPrivKey, C.kaspa_secp256k1_nonce_function_rfc6979, cPtrAux)
 	if ret != 1 {
 		return nil, errors.New("failed Signing. You should call `DeserializeECDSAPrivateKey` before calling this")
 	}
@@ -64,7 +65,7 @@ func (key ECDSAPrivateKey) String() string {
 func DeserializeECDSAPrivateKey(data *SerializedPrivateKey) (key *ECDSAPrivateKey, err error) {
 	cPtr := (*C.uchar)(&data[0])
 
-	ret := C.secp256k1_ec_seckey_verify(C.secp256k1_context_no_precomp, cPtr)
+	ret := C.kaspa_secp256k1_ec_seckey_verify(C.kaspa_secp256k1_context_no_precomp, cPtr)
 	if ret != 1 {
 		return nil, errors.New("invalid ECDSAPrivateKey (zero or bigger than the group order)")
 	}
@@ -97,7 +98,7 @@ func GenerateECDSAPrivateKey() (key *ECDSAPrivateKey, err error) {
 		if n != len(key.privateKey) {
 			panic("The standard library promises that this should never happen")
 		}
-		ret := C.secp256k1_ec_seckey_verify(C.secp256k1_context_no_precomp, cPtr)
+		ret := C.kaspa_secp256k1_ec_seckey_verify(C.kaspa_secp256k1_context_no_precomp, cPtr)
 		if ret == 1 {
 			return key, nil
 		}
@@ -116,7 +117,7 @@ func (key *ECDSAPrivateKey) Negate() error {
 		return errNonInitializedKey
 	}
 	cPtr := (*C.uchar)(&key.privateKey[0])
-	ret := C.secp256k1_ec_privkey_negate(C.secp256k1_context_no_precomp, cPtr)
+	ret := C.kaspa_secp256k1_ec_privkey_negate(C.kaspa_secp256k1_context_no_precomp, cPtr)
 	if ret != 1 {
 		panic("Failed Negating the private key. Should never happen")
 	}
@@ -131,7 +132,7 @@ func (key *ECDSAPrivateKey) Add(tweak [32]byte) error {
 	}
 	cPtrKey := (*C.uchar)(&key.privateKey[0])
 	cPtrTweak := (*C.uchar)(&tweak[0])
-	ret := C.secp256k1_ec_privkey_tweak_add(C.secp256k1_context_no_precomp, cPtrKey, cPtrTweak)
+	ret := C.kaspa_secp256k1_ec_privkey_tweak_add(C.kaspa_secp256k1_context_no_precomp, cPtrKey, cPtrTweak)
 	if ret != 1 {
 		return errors.New("failed Adding to private key. Tweak is bigger than the order or the complement of the private key")
 	}

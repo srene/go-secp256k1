@@ -1,4 +1,4 @@
-load("secp256k1_params.sage")
+load("kaspa_secp256k1_params.sage")
 
 orders_done = set()
 results = {}
@@ -95,13 +95,13 @@ for f in sorted(results.keys()):
     G = results[f]["G"]
     print("#  %s EXHAUSTIVE_TEST_ORDER == %i" % ("if" if first else "elif", f))
     first = False
-    print("static const secp256k1_ge secp256k1_ge_const_g = SECP256K1_GE_CONST(")
+    print("static const kaspa_secp256k1_ge kaspa_secp256k1_ge_const_g = kaspa_secp256k1_GE_CONST(")
     print("    0x%08x, 0x%08x, 0x%08x, 0x%08x," % tuple((int(G[0]) >> (32 * (7 - i))) & 0xffffffff for i in range(4)))
     print("    0x%08x, 0x%08x, 0x%08x, 0x%08x," % tuple((int(G[0]) >> (32 * (7 - i))) & 0xffffffff for i in range(4, 8)))
     print("    0x%08x, 0x%08x, 0x%08x, 0x%08x," % tuple((int(G[1]) >> (32 * (7 - i))) & 0xffffffff for i in range(4)))
     print("    0x%08x, 0x%08x, 0x%08x, 0x%08x" % tuple((int(G[1]) >> (32 * (7 - i))) & 0xffffffff for i in range(4, 8)))
     print(");")
-    print("static const secp256k1_fe secp256k1_fe_const_b = SECP256K1_FE_CONST(")
+    print("static const kaspa_secp256k1_fe kaspa_secp256k1_fe_const_b = kaspa_secp256k1_FE_CONST(")
     print("    0x%08x, 0x%08x, 0x%08x, 0x%08x," % tuple((int(b) >> (32 * (7 - i))) & 0xffffffff for i in range(4)))
     print("    0x%08x, 0x%08x, 0x%08x, 0x%08x" % tuple((int(b) >> (32 * (7 - i))) & 0xffffffff for i in range(4, 8)))
     print(");")

@@ -11,10 +11,10 @@
  * - December 2014, Pieter Wuille: converted from YASM to GCC inline assembly
  */
 
-#ifndef SECP256K1_FIELD_INNER5X52_IMPL_H
-#define SECP256K1_FIELD_INNER5X52_IMPL_H
+#ifndef kaspa_secp256k1_FIELD_INNER5X52_IMPL_H
+#define kaspa_secp256k1_FIELD_INNER5X52_IMPL_H
 
-SECP256K1_INLINE static void secp256k1_fe_mul_inner(uint64_t *r, const uint64_t *a, const uint64_t * SECP256K1_RESTRICT b) {
+kaspa_secp256k1_INLINE static void kaspa_secp256k1_fe_mul_inner(uint64_t *r, const uint64_t *a, const uint64_t * kaspa_secp256k1_RESTRICT b) {
 /**
  * Registers: rdx:rax = multiplication accumulator
  *            r9:r8   = c
@@ -284,7 +284,7 @@ __asm__ __volatile__(
 );
 }
 
-SECP256K1_INLINE static void secp256k1_fe_sqr_inner(uint64_t *r, const uint64_t *a) {
+kaspa_secp256k1_INLINE static void kaspa_secp256k1_fe_sqr_inner(uint64_t *r, const uint64_t *a) {
 /**
  * Registers: rdx:rax = multiplication accumulator
  *            r9:r8   = c
@@ -499,4 +499,4 @@ __asm__ __volatile__(
 );
 }
 
-#endif /* SECP256K1_FIELD_INNER5X52_IMPL_H */
+#endif /* kaspa_secp256k1_FIELD_INNER5X52_IMPL_H */

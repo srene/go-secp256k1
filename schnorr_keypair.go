@@ -8,14 +8,15 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"github.com/pkg/errors"
 	"unsafe"
+
+	"github.com/pkg/errors"
 )
 
 // SchnorrKeyPair is a type representing a pair of Secp256k1 private and public keys.
 // This can be used to create Schnorr signatures
 type SchnorrKeyPair struct {
-	keypair C.secp256k1_keypair
+	keypair C.kaspa_secp256k1_keypair
 	init    bool
 }
 
@@ -38,7 +39,7 @@ func DeserializeSchnorrPrivateKey(data *SerializedPrivateKey) (*SchnorrKeyPair, 
 	key := SchnorrKeyPair{init: true}
 	cPtrPrivateKey := (*C.uchar)(&data[0])
 
-	ret := C.secp256k1_keypair_create(context, &key.keypair, cPtrPrivateKey)
+	ret := C.kaspa_secp256k1_keypair_create(context, &key.keypair, cPtrPrivateKey)
 	if ret != 1 {
 		return nil, errors.New("invalid SchnorrKeyPair (zero or bigger than the group order)")
 	}
@@ -80,7 +81,7 @@ func GenerateSchnorrKeyPair() (key *SchnorrKeyPair, err error) {
 func (key *SchnorrKeyPair) SerializePrivateKey() *SerializedPrivateKey {
 	serialized := SerializedPrivateKey{}
 	cPtr := (*C.uchar)(&serialized[0])
-	ret := C.secp256k1_keypair_sec(C.secp256k1_context_no_precomp, cPtr, &key.keypair)
+	ret := C.kaspa_secp256k1_keypair_sec(C.kaspa_secp256k1_context_no_precomp, cPtr, &key.keypair)
 	if ret != 1 {
 		panic("failed serializing the secret key. Should never happen (upstream promise to return 1)")
 	}
@@ -94,7 +95,7 @@ func (key *SchnorrKeyPair) Add(tweak [32]byte) error {
 		return errors.WithStack(errNonInitializedKey)
 	}
 	cPtrTweak := (*C.uchar)(&tweak[0])
-	ret := C.secp256k1_keypair_xonly_tweak_add(context, &key.keypair, cPtrTweak)
+	ret := C.kaspa_secp256k1_keypair_xonly_tweak_add(context, &key.keypair, cPtrTweak)
 	if ret != 1 {
 		return errors.New("failed Adding to private key. Tweak is bigger than the order or the complement of the private key")
 	}
@@ -113,7 +114,7 @@ func (key *SchnorrKeyPair) schnorrPublicKeyInternal() (pubkey *SchnorrPublicKey,
 	}
 	pubkey = &SchnorrPublicKey{init: true}
 	cParity := C.int(42)
-	ret := C.secp256k1_keypair_xonly_pub(context, &pubkey.pubkey, &cParity, &key.keypair)
+	ret := C.kaspa_secp256k1_keypair_xonly_pub(context, &pubkey.pubkey, &cParity, &key.keypair)
 	if ret != 1 {
 		return nil, false, errors.New("the keypair contains invalid data")
 	}
@@ -141,7 +142,7 @@ func (key *SchnorrKeyPair) schnorrSignInternal(hash *Hash, auxiliaryRand *[32]by
 	cPtrSig := (*C.uchar)(&signature.signature[0])
 	cPtrHash := (*C.uchar)(&hash[0])
 	cPtrAux := unsafe.Pointer(auxiliaryRand)
-	ret := C.secp256k1_schnorrsig_sign(context, cPtrSig, cPtrHash, &key.keypair, C.secp256k1_nonce_function_bip340, cPtrAux)
+	ret := C.kaspa_secp256k1_schnorrsig_sign(context, cPtrSig, cPtrHash, &key.keypair, C.kaspa_secp256k1_nonce_function_bip340, cPtrAux)
 	if ret != 1 {
 		return nil, errors.New("failed Signing. You should call `DeserializeSchnorrPrivateKey` before calling this")
 	}
